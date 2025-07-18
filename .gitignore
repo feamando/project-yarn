@@ -31,13 +31,106 @@ pnpm-debug.log*
 *.sln
 *.sw?
 
-# Rust
-/target/
-**/*.rs.bk
+# ============================================================================
+# BUILD ARTIFACTS - COMPREHENSIVE EXCLUSIONS
+# ============================================================================
+# These patterns prevent large build artifacts from being committed to git
+# Critical for avoiding GitHub file size limits and repository bloat
 
-# Tauri
+# Rust Build Artifacts
+/target/
+**/target/
+**/*.rs.bk
+*.rlib
+*.rmeta
+*.pdb
+*.exe
+*.dll
+*.so
+*.dylib
+*.a
+*.lib
+
+# Tauri Build Artifacts
 /src-tauri/target/
 /src-tauri/Cargo.lock
+*.app
+*.dmg
+*.msi
+*.deb
+*.AppImage
+*.rpm
+*.pkg
+
+# Node.js Build Artifacts
+node_modules/
+/dist/
+/build/
+/.next/
+/.nuxt/
+/.output/
+/.vite/
+/.turbo/
+*.tsbuildinfo
+
+# Platform-Specific Build Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# IDE and Editor Build Artifacts
+.vscode/settings.json
+.vscode/.ropeproject
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.user
+*.userosscache
+*.sln.docstates
+
+# Compilation and Debug Files
+*.obj
+*.o
+*.lo
+*.la
+*.al
+*.libs
+*.lai
+*.so.*
+*.dll.a
+*.dylib.*
+*.exp
+*.ilk
+*.map
+*.pch
+*.pdb
+*.pgc
+*.pgd
+*.rsp
+*.sbr
+*.tlb
+*.tli
+*.tlh
+*.tmp_proj
+*.log
+*.vspscc
+*.vssscc
+.builds
+*.pidb
+*.svclog
+*.scc
 
 # ============================================================================
 # AI MODELS AND MACHINE LEARNING ASSETS

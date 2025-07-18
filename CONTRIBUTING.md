@@ -204,6 +204,55 @@ git add .
 git commit -m "feat: add your feature description"
 ```
 
+## 🧹 Repository Cleanup and Large File Prevention
+
+### Overview
+
+Project Yarn implements comprehensive measures to prevent large files and build artifacts from being committed to the repository. This ensures fast clones, prevents GitHub push failures, and maintains repository health.
+
+### Automated Protection Systems
+
+#### 1. Enhanced .gitignore
+
+Our `.gitignore` file excludes:
+
+**Build Artifacts:**
+- Rust build files: `target/`, `*.rlib`, `*.rmeta`, `*.pdb`
+- Tauri distributables: `*.app`, `*.dmg`, `*.msi`, `*.deb`
+- Node.js artifacts: `node_modules/`, `dist/`, `build/`
+- Platform binaries: `*.exe`, `*.dll`, `*.so`, `*.dylib`
+
+**AI Models and Large Assets:**
+- Model files: `*.bin`, `*.onnx`, `*.safetensors`, `*.pt`, `*.h5`
+- Model directories: `models/`, `local-models/`, `ai-models/`
+- Cache directories: `.cache/`, `.huggingface/`, `.transformers_cache/`
+
+#### 2. Pre-commit Validation
+
+Automatic validation runs before each commit:
+
+```bash
+# Manual validation (optional)
+npm run validate-commit
+
+# Or use PowerShell directly
+powershell -ExecutionPolicy Bypass -File scripts/validate-commit.ps1
+```
+
+**Validation Checks:**
+- File size limits (default: 50MB)
+- Blocked file patterns (build artifacts)
+- AI model exclusions
+- Temporary file detection
+
+#### 3. Git Hooks
+
+Automatically installed hooks provide:
+
+- **pre-commit**: Validates all staged files
+- **pre-push**: Additional checks before remote push
+- **commit-msg**: Enhances commit messages with validation markers
+
 ### 5. Push and Create Pull Request
 
 ```bash

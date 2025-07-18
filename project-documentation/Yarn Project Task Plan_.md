@@ -381,12 +381,199 @@ pub struct ModelUpdateManager {
 }
 ```
 
+#### **Task 1.6.7: Repository Cleanup for Large Artifacts**
+
+**Problem Statement:**
+The Project Yarn repository contains large build artifacts (target/, src-tauri/target/, *.rlib, *.rmeta files) that exceed GitHub's file size limits (50MB recommended, 100MB hard limit). These files cause repository bloat, slow clone times, and prevent successful pushes to GitHub. The repository currently contains over 17,000 build artifacts totaling several gigabytes.
+
+**Implementation Details:**
+
+**Task 1.6.7.1: Identify and Catalog Large Files**
+- Create comprehensive catalog of all large files in repository
+- Document file sizes, paths, and impact on repository
+- Identify root causes (missing .gitignore, accidental commits)
+- Generate LARGE_FILES_CATALOG.md with detailed analysis
+
+**Commands for identification:**
+```bash
+# Find large files in git history
+git rev-list --objects --all | git cat-file --batch-check='%(objecttype) %(objectname) %(objectsize) %(rest)' | awk '/^blob/ {print substr($0,6)}' | sort --numeric-sort --key=2 | tail -20
+
+# Find large files in current directory
+find . -type f -size +10M -exec ls -lh {} \; | sort -k5 -hr
+
+# Count build artifacts
+git ls-files | grep -E "(target/|*.rlib|*.rmeta)" | wc -l
+```
+
+**Task 1.6.7.2: Remove Large Files from Git History**
+- Create backup branch before destructive operations
+- Use git-filter-repo or BFG Repo-Cleaner to remove large files from history
+- Alternative: Use git filter-branch for comprehensive cleanup
+- Remove entire build artifact directories and file patterns
+- Verify removal and repository size reduction
+
+**PowerShell cleanup script:**
+```powershell
+# Create backup branch
+git checkout -b "backup-before-cleanup-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
+git checkout master
+
+# Remove large files from git history
+git filter-branch --force --index-filter 'git rm --cached --ignore-unmatch -r target src-tauri/target *.rlib *.rmeta *.pdb' --prune-empty --tag-name-filter cat -- --all
+
+# Clean up git references
+git for-each-ref --format='delete %(refname)' refs/original | git update-ref --stdin
+git reflog expire --expire=now --all
+git gc --prune=now --aggressive
+```
+
+**Task 1.6.7.3: Update .gitignore to Robustly Exclude Build Artifacts**
+- Enhance existing .gitignore with comprehensive build artifact exclusions
+- Add platform-specific build artifacts (Windows, macOS, Linux)
+- Include IDE-specific files and temporary artifacts
+- Add comments explaining each exclusion category
+
+**Enhanced .gitignore additions:**
+```gitignore
+# Build artifacts - Rust
+target/
+**/*.rs.bk
+*.pdb
+*.rlib
+*.rmeta
+
+# Build artifacts - Node.js
+node_modules/
+dist/
+build/
+.next/
+
+# Build artifacts - Tauri
+src-tauri/target/
+src-tauri/Cargo.lock
+*.app
+*.dmg
+*.msi
+*.deb
+*.AppImage
+
+# Platform-specific
+.DS_Store
+Thumbs.db
+*.tmp
+*.temp
+
+# IDE artifacts
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+
+# Model files (large AI models)
+models/
+*.onnx
+*.bin
+*.safetensors
+*.gguf
+```
+
+**Task 1.6.7.4: Add Validation Script to Prevent Future Large File Commits**
+- Create pre-commit hook to validate file sizes
+- Implement PowerShell/Bash script for cross-platform compatibility
+- Add file size limits and pattern matching
+- Provide clear error messages for blocked commits
+
+**Pre-commit validation script:**
+```powershell
+# scripts/validate-commit.ps1
+$maxSizeMB = 50
+$blockedPatterns = @("target/", "*.rlib", "*.rmeta", "*.pdb", "models/")
+
+$stagedFiles = git diff --cached --name-only
+foreach ($file in $stagedFiles) {
+    if (Test-Path $file) {
+        $sizeMB = (Get-Item $file).Length / 1MB
+        if ($sizeMB -gt $maxSizeMB) {
+            Write-Error "File $file ($([math]::Round($sizeMB, 2)) MB) exceeds $maxSizeMB MB limit"
+            exit 1
+        }
+    }
+    
+    foreach ($pattern in $blockedPatterns) {
+        if ($file -like $pattern) {
+            Write-Error "File $file matches blocked pattern: $pattern"
+            exit 1
+        }
+    }
+}
+```
+
+**Task 1.6.7.5: Setup Git Hooks for Automated Validation**
+- Install pre-commit hook in .git/hooks/
+- Create setup script for contributor environments
+- Add hook installation to contributor setup guide
+- Test hook functionality with various file types
+
+**Git hook setup:**
+```bash
+# .git/hooks/pre-commit
+#!/bin/sh
+if command -v pwsh >/dev/null 2>&1; then
+    pwsh -File scripts/validate-commit.ps1
+else
+    bash scripts/validate-commit.sh
+fi
+```
+
+**Task 1.6.7.6: Document Cleanup and Prevention Steps**
+- Update CONTRIBUTING.md with cleanup procedures
+- Document prevention strategies for contributors
+- Add troubleshooting guide for common issues
+- Include repository maintenance best practices
+
+**Documentation sections:**
+- Repository size management
+- Build artifact exclusion policies
+- Pre-commit validation setup
+- Emergency cleanup procedures
+- Model file management guidelines
+
+**Task 1.6.7.7: Verify and Test Clean Repository**
+- Verify all large files removed from git history
+- Test repository clone and push operations
+- Validate .gitignore effectiveness
+- Test pre-commit hooks with various scenarios
+- Confirm GitHub push success without size limit errors
+
+**Verification commands:**
+```bash
+# Check repository size
+du -sh .git/
+
+# Verify no large files in git
+git ls-files | xargs ls -la | awk '$5 > 50000000 {print $9, $5}'
+
+# Test GitHub push
+git push origin master --force
+```
+
+**Success Criteria:**
+- Repository size reduced by >90%
+- All build artifacts removed from git history
+- Enhanced .gitignore prevents future artifact commits
+- Pre-commit validation blocks large files
+- GitHub push succeeds without size limit errors
+- Documentation updated with cleanup procedures
+- Contributor setup includes validation tools
+
 ## **Section 2: Phase 2 Task Plan — AI-Forward Enhancements**
 
 With the core architectural risks retired in Phase 1, Phase 2 focuses on building the advanced AI and structured workflow features that constitute Project Yarn's primary value proposition. This phase will transform the application from a basic editor into an intelligent "IDE for Documents".1
 
 The central architectural component of this phase is the AiProvider abstraction. The product requirements mandate support for multiple, switchable AI providers (local, AWS Bedrock, Google Gemini).1 A naive implementation would lead to brittle, hard-to-maintain conditional logic throughout the codebase. The technical strategy explicitly mandates the Adapter/Strategy design pattern to avoid this, defining an
-
+{{ ... }}
 AiProvider trait as a unified contract for AI interaction.1 This decouples the application's core logic from the specific implementation details of any given AI service. Therefore, the implementation of this trait is the lynchpin of the entire phase. The plan prioritizes creating this abstraction first, which then allows the individual provider implementations to be developed as independent, parallelizable tasks.
 
 Simultaneously, this phase will implement the advanced Retrieval-Augmented Generation (RAG) system. The power of this system derives from a hybrid approach, combining the lexical, keyword-based search of SQLite's FTS5 extension with the semantic, conceptual search enabled by a local vector database.1 This dual-source retrieval ensures that the AI agent receives rich, relevant context for its generations, fulfilling the requirement for multi-file context awareness.1
