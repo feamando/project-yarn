@@ -168,7 +168,7 @@ jobs:
 
       - name: Upload test coverage
         if: matrix.platform == 'ubuntu-latest'
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           file: ./coverage/lcov.info
           flags: frontend
