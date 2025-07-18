@@ -1,22 +1,202 @@
-name: 'CI'
+name: 'CI/CD Pipeline'
 on:
   push:
-    branches: [ main ]
+    branches: [ main, develop ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, develop ]
+  workflow_dispatch:
+    inputs:
+      skip_model_cache:
+        description: 'Skip model cache and force re-download'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+  YARN_MODELS_DIR: ${{ github.workspace }}/models
+  YARN_CACHE_MODELS: true
 
 jobs:
-  test-tauri:
+  # Validation job - runs first to catch issues early
+  validate:
+    name: 'Validate Repository'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for git validation
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate .gitignore
+        run: npm run validate-gitignore
+
+      - name: Check for large files
+        run: |
+          echo "Checking for large files in repository..."
+          find . -type f -size +50M -not -path './.git/*' -not -path './node_modules/*' -not -path './models/*' | head -10
+          if [ $(find . -type f -size +50M -not -path './.git/*' -not -path './node_modules/*' -not -path './models/*' | wc -l) -gt 0 ]; then
+            echo "❌ Large files found in repository!"
+            exit 1
+          fi
+          echo "✅ No large files found in repository"
+
+      - name: Validate model configuration
+        run: |
+          echo "Validating model configuration..."
+          if [ ! -f "models.config.json" ]; then
+            echo "❌ models.config.json not found"
+            exit 1
+          fi
+          node -e "JSON.parse(require('fs').readFileSync('models.config.json', 'utf8'))"
+          echo "✅ Model configuration is valid JSON"
+
+  # Test job - runs tests with model dependencies
+  test:
+    name: 'Test (${{ matrix.platform }})'
+    needs: validate
     strategy:
       fail-fast: false
       matrix:
-        platform: [macos-latest, windows-latest]
+        platform: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - platform: ubuntu-latest
+            os_name: linux
+          - platform: windows-latest
+            os_name: windows
+          - platform: macos-latest
+            os_name: macos
 
     runs-on: ${{ matrix.platform }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Setup node
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+          key: ${{ matrix.platform }}-rust-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Install system dependencies (Linux)
+        if: matrix.platform == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Cache AI models
+        id: cache-models
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ github.workspace }}/models
+            ~/.cache/project-yarn/models
+          key: models-${{ matrix.os_name }}-${{ hashFiles('models.config.json') }}-v2
+          restore-keys: |
+            models-${{ matrix.os_name }}-
+            models-
+
+      - name: Setup AI models
+        run: |
+          echo "Setting up AI models for CI..."
+          # Create models directory
+          mkdir -p models
+          
+          # Check if models are cached
+          if [ "${{ steps.cache-models.outputs.cache-hit }}" = "true" ] && [ "${{ github.event.inputs.skip_model_cache }}" != "true" ]; then
+            echo "✅ Models restored from cache"
+            npm run models:status || echo "Cache validation failed, will re-download"
+          else
+            echo "📥 Downloading models..."
+            # Use smaller models for CI to save time and bandwidth
+            npm run setup-models -- --variant cpu-int4 --non-interactive
+          fi
+          
+          # Verify models are working
+          npm run verify-models --quiet
+        env:
+          YARN_CI_MODE: true
+          YARN_MODELS_VARIANT: cpu-int4
+
+      - name: Run frontend linting
+        run: npm run lint
+
+      - name: Run frontend tests
+        run: npm run test -- --coverage
+
+      - name: Run Rust formatting check
+        run: cargo fmt --all -- --check
+        working-directory: ./src-tauri
+
+      - name: Run Rust linting
+        run: cargo clippy --all-targets --all-features -- -D warnings
+        working-directory: ./src-tauri
+
+      - name: Run backend tests
+        run: cargo test --workspace --verbose
+        working-directory: ./src-tauri
+
+      - name: Verify model integration
+        run: |
+          echo "Testing model integration..."
+          npm run git:validate
+          echo "✅ Model integration verified"
+
+      - name: Upload test coverage
+        if: matrix.platform == 'ubuntu-latest'
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage/lcov.info
+          flags: frontend
+          name: frontend-coverage
+
+  # Build job - creates release artifacts
+  build:
+    name: 'Build (${{ matrix.platform }})'
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - platform: ubuntu-latest
+            os_name: linux
+          - platform: windows-latest
+            os_name: windows
+          - platform: macos-latest
+            os_name: macos
+
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
@@ -29,29 +209,171 @@ jobs:
         uses: swatinem/rust-cache@v2
         with:
           workspaces: './src-tauri -> target'
+          key: ${{ matrix.platform }}-rust-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Install dependencies (ubuntu only)
+      - name: Install system dependencies (Linux)
         if: matrix.platform == 'ubuntu-latest'
         run: |
           sudo apt-get update
           sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libappindicator3-dev librsvg2-dev patchelf
 
       - name: Install frontend dependencies
-        run: npm install
+        run: npm ci
 
-      - name: Run frontend tests
-        run: npm run test
+      - name: Cache AI models
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ github.workspace }}/models
+            ~/.cache/project-yarn/models
+          key: models-${{ matrix.os_name }}-${{ hashFiles('models.config.json') }}-v2
+          restore-keys: |
+            models-${{ matrix.os_name }}-
+            models-
 
-      - name: Run backend tests
-        run: cargo test --workspace
-        working-directory: ./src-tauri
+      - name: Setup AI models for build
+        run: |
+          echo "Setting up AI models for build..."
+          mkdir -p models
+          npm run setup-models -- --variant cpu-int4 --non-interactive
+          npm run verify-models --quiet
+        env:
+          YARN_CI_MODE: true
+          YARN_MODELS_VARIANT: cpu-int4
 
-      - uses: tauri-apps/tauri-action@v0
+      - name: Build application
+        uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Tauri code signing secrets (optional - set in repository secrets for signed builds)
+          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
         with:
-          tagName: app-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version
-          releaseName: 'App v__VERSION__'
-          releaseBody: 'See the assets to download this version and install.'
+          tagName: app-v__VERSION__
+          releaseName: 'Project Yarn v__VERSION__'
+          releaseBody: |
+            ## What's Changed
+            See the assets below to download this version and install.
+            
+            ### AI Models
+            This release includes support for:
+            - Microsoft Phi-3 Mini (INT4) - 2GB, fast inference
+            - Microsoft Phi-3 Mini (FP16) - 7GB, high quality
+            - Microsoft Phi-3 Mini 128K - 2GB, extended context
+            
+            Models are downloaded separately using the built-in model management system.
+            
+            ### Installation
+            1. Download the appropriate installer for your platform
+            2. Run the installer
+            3. Launch Project Yarn
+            4. Follow the model setup wizard
+            
+            For detailed setup instructions, see the [Contributing Guide](https://github.com/feamando/project-yarn/blob/main/CONTRIBUTING.md).
           releaseDraft: true
           prerelease: false
+          includeUpdaterJson: true
+
+  # Model validation job - ensures model management works correctly
+  model-validation:
+    name: 'Model Validation'
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Test model management scripts
+        run: |
+          echo "Testing model management scripts..."
+          
+          # Test model configuration validation
+          node scripts/setup-models.js --check
+          
+          # Test model setup (dry run)
+          node scripts/setup-models.js --dry-run
+          
+          # Test model verification (without actual models)
+          node scripts/verify-models.js --config-only
+          
+          # Test update script
+          node scripts/update-models.js --check
+          
+          echo "✅ All model management scripts validated"
+
+      - name: Test git hooks
+        run: |
+          echo "Testing git hooks..."
+          
+          # Test pre-commit hook
+          node scripts/pre-commit-hook.js --test
+          
+          # Test gitignore validation
+          npm run validate-gitignore
+          
+          echo "✅ Git hooks validated"
+
+      - name: Simulate model download
+        run: |
+          echo "Simulating model download process..."
+          
+          # Create fake model file to test exclusion
+          mkdir -p models
+          dd if=/dev/zero of=models/test-model.onnx bs=1M count=100
+          
+          # Verify it's excluded from git
+          if git status --porcelain | grep -q "models/test-model.onnx"; then
+            echo "❌ Model file is not properly excluded from git!"
+            exit 1
+          fi
+          
+          echo "✅ Model exclusion working correctly"
+          
+          # Clean up
+          rm -rf models/test-model.onnx
+
+  # Security scan job
+  security:
+    name: 'Security Scan'
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run npm audit
+        run: npm audit --audit-level=high
+
+      - name: Run Rust security audit
+        run: |
+          cargo install cargo-audit
+          cargo audit
+        working-directory: ./src-tauri
+
+      - name: Check for secrets
+        run: |
+          echo "Checking for potential secrets..."
+          # Check for common secret patterns
+          if grep -r -i "api[_-]key\|secret\|password\|token" --include="*.js" --include="*.ts" --include="*.rs" --exclude-dir=node_modules --exclude-dir=target . | grep -v "// " | grep -v "\* " | head -5; then
+            echo "⚠️ Potential secrets found - please review"
+          else
+            echo "✅ No obvious secrets found"
+          fi

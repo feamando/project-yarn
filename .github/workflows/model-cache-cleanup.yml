@@ -1,0 +1,81 @@
+name: 'Model Cache Cleanup'
+
+# Clean up old model caches to save storage space
+on:
+  schedule:
+    # Run weekly on Sundays at 2 AM UTC
+    - cron: '0 2 * * 0'
+  workflow_dispatch:
+    inputs:
+      force_cleanup:
+        description: 'Force cleanup of all caches'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  cleanup-model-cache:
+    name: 'Cleanup Model Cache'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cleanup old model caches
+        id: cleanup-caches
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: caches } = await github.rest.actions.getActionsCaches({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 100
+            });
+            
+            const modelCaches = caches.actions_caches.filter(cache => 
+              cache.key.startsWith('models-')
+            );
+            
+            // Keep only the 3 most recent caches per platform
+            const cachesByPlatform = {};
+            modelCaches.forEach(cache => {
+              const platform = cache.key.split('-')[1];
+              if (!cachesByPlatform[platform]) {
+                cachesByPlatform[platform] = [];
+              }
+              cachesByPlatform[platform].push(cache);
+            });
+            
+            let deletedCount = 0;
+            const forceCleanup = ${{ github.event.inputs.force_cleanup || false }};
+            
+            for (const [platform, caches] of Object.entries(cachesByPlatform)) {
+              // Sort by created date, newest first
+              caches.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+              
+              const toDelete = forceCleanup ? caches : caches.slice(3);
+              
+              for (const cache of toDelete) {
+                try {
+                  await github.rest.actions.deleteActionsCacheById({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    cache_id: cache.id
+                  });
+                  console.log(`Deleted cache: ${cache.key} (${cache.size_in_bytes} bytes)`);
+                  deletedCount++;
+                } catch (error) {
+                  console.error(`Failed to delete cache ${cache.key}:`, error.message);
+                }
+              }
+            }
+            
+            console.log(`Cleanup completed. Deleted ${deletedCount} model caches.`);
+            
+            // Set output for summary
+            core.setOutput('deleted_count', deletedCount);
+            core.setOutput('total_caches', modelCaches.length);
+
+      - name: Create cleanup summary
+        run: |
+          echo "## Model Cache Cleanup Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- Total model caches found: ${{ steps.cleanup-caches.outputs.total_caches }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Caches deleted: ${{ steps.cleanup-caches.outputs.deleted_count }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Cleanup completed at: $(date -u)" >> $GITHUB_STEP_SUMMARY

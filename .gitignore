@@ -39,6 +39,115 @@ pnpm-debug.log*
 /src-tauri/target/
 /src-tauri/Cargo.lock
 
+# ============================================================================
+# AI MODELS AND MACHINE LEARNING ASSETS
+# ============================================================================
+# These files are managed by the model management scripts and should not be
+# committed to git due to their large size (typically 2-8GB per model)
+
+# Model Files - All Formats
+*.bin
+*.onnx
+*.safetensors
+*.pt
+*.pth
+*.pytorch
+*.model
+*.weights
+*.h5
+*.pb
+*.tflite
+*.mlmodel
+*.coreml
+*.ggml
+*.gguf
+*.q4_0
+*.q4_1
+*.q5_0
+*.q5_1
+*.q8_0
+*.f16
+*.f32
+
+# Model Directories
+/models/
+/local-models/
+/ai-models/
+/ml-models/
+/model-cache/
+/model-assets/
+**/models/
+**/ai-models/
+**/ml-models/
+
+# Specific Model Patterns
+**/phi-3-mini*/
+**/phi-3-*/
+**/microsoft--Phi-3-*/
+**/microsoft--*
+**/huggingface--*
+**/transformers--*
+**/*-onnx/
+**/*-pytorch/
+**/*-safetensors/
+**/*-quantized/
+**/*-int4/
+**/*-int8/
+**/*-fp16/
+**/*-fp32/
+
+# Model Configuration and Status Files (keep examples, exclude actual)
+local-models.json
+model-status.json
+model-registry.json
+*.model.json
+!models.example.toml
+!models.config.json
+!model-template.json
+
+# Model Cache and Temporary Files
+.cache/
+.model-cache/
+.huggingface/
+.transformers_cache/
+.onnx_cache/
+.pytorch_cache/
+**/.cache/
+**/.model-cache/
+**/.huggingface/
+**/.transformers_cache/
+
+# Model Download Temporary Files
+*.tmp
+*.download
+*.partial
+*.downloading
+**/temp/models/
+**/tmp/models/
+/temp/
+/tmp/
+model-downloads/
+downloads/models/
+
+# Model Backup Files
+*.backup
+*.bak
+*.old
+backups/models/
+model-backups/
+
+# Model Verification and Reports
+model-verification-report.json
+model-integrity-report.json
+model-performance-report.json
+*.verification.json
+*.integrity.json
+
+# Large build artifacts
+Cargo.lock
+/dist/
+/build/
+
 # OS generated files
 .DS_Store
 .DS_Store?

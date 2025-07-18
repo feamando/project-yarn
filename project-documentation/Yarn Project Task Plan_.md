@@ -147,6 +147,240 @@ This final workstream for Phase 1 connects all the previously built components i
 | 1.5.5 | MVP Integration | ui-react | Integrate get\_autocomplete command into editor component. | 1.3.5, 1.4.6 | 5.2 | N/A |
 | 1.5.6 | MVP Integration | ui-react | Test autocomplete feature integration. | 1.5.5 | 5.2 | Vitest IPC mock test. |
 
+### **1.6 Workstream: Scalable Deployment Strategy**
+
+This workstream addresses the challenges of deploying Project Yarn at scale, particularly managing large AI model files that cannot be stored in version control systems like GitHub. The primary challenge is the Phi-3-mini autocomplete model and other ML assets that can be several gigabytes in size.
+
+**Key Technical Challenges:**
+- Large AI model files (Phi-3-mini ~2-4GB) exceed GitHub's file size limits
+- Contributors need a seamless way to obtain and use local models
+- CI/CD pipelines must handle model dependencies without storing them in git
+- Model versioning and updates need to be managed independently from code
+
+**Strategic Approach:**
+- Implement a model asset management system using local storage
+- Create automated model download and setup scripts for contributors
+- Establish clear separation between code and model assets
+- Implement model integrity verification (checksums, signatures)
+
+| Task ID | Category | Module | Description | Dependencies | User Story | Test Strategy |
+|---------|----------|--------|-------------|--------------|------------|---------------|
+| 1.6.1 | Deployment | core-rust | Implement ModelAssetManager for downloading and managing AI models. | 1.4.1 | 5.1 | Rust unit test for download and verification. |
+| 1.6.2 | Deployment | local-model-sidecar | Create model download script and configuration system. | 1.6.1 | 5.1 | Integration test for model setup. |
+| 1.6.3 | Deployment | infrastructure | Update .gitignore to exclude all model files and build artifacts. | 1.1.1 | N/A | Manual verification of git status. |
+| 1.6.4 | Deployment | documentation | Create contributor setup guide for local model installation. | 1.6.2 | N/A | Manual testing of setup process. |
+| 1.6.5 | Deployment | ci-cd | Implement CI/CD pipeline that handles model dependencies. | 1.6.1 | N/A | Automated build verification. |
+| 1.6.6 | Deployment | infrastructure | Create model versioning and update system. | 1.6.1 | 5.1 | Integration test for model updates. |
+
+#### **Task 1.6.1: Implement ModelAssetManager for downloading and managing AI models**
+
+**Implementation Details:**
+- Create `ModelAssetManager` struct in `src-tauri/src/infrastructure/model_manager.rs`
+- Implement async methods for model download, verification, and caching
+- Support multiple model formats (ONNX, SafeTensors, PyTorch)
+- Implement SHA256 checksum verification for model integrity
+- Create model metadata system with version tracking
+- Handle partial downloads and resume functionality
+- Implement progress reporting for download operations
+
+**Key Components:**
+```rust
+pub struct ModelAssetManager {
+    cache_dir: PathBuf,
+    client: reqwest::Client,
+    config: ModelConfig,
+}
+
+impl ModelAssetManager {
+    pub async fn download_model(&self, model_id: &str) -> Result<PathBuf, ModelError>
+    pub async fn verify_model(&self, path: &PathBuf) -> Result<bool, ModelError>
+    pub async fn get_model_path(&self, model_id: &str) -> Result<PathBuf, ModelError>
+    pub async fn list_available_models(&self) -> Result<Vec<ModelInfo>, ModelError>
+}
+```
+
+**Configuration:**
+- Model registry configuration in `models.toml`
+- Support for multiple model sources (Hugging Face, custom CDN)
+- Configurable cache directory and retention policies
+
+#### **Task 1.6.2: Create model download script and configuration system**
+
+**Implementation Details:**
+- Create `setup-models.js` Node.js script for automated model setup
+- Implement cross-platform model download logic
+- Create interactive CLI for model selection and configuration
+- Support for different model variants (CPU, GPU, quantized)
+- Implement model verification and integrity checks
+- Create fallback mechanisms for network failures
+
+**Script Features:**
+```javascript
+// setup-models.js
+const setupModels = async () => {
+  // Check system requirements (RAM, disk space)
+  // Download required models based on system capabilities
+  // Verify model integrity
+  // Configure local-model-sidecar
+  // Test model loading
+};
+```
+
+**Configuration Files:**
+- `models.config.json` - Model registry and download URLs
+- `local-models.json` - Local model installation status
+- Environment-specific model configurations
+
+**Package.json Scripts:**
+```json
+{
+  "scripts": {
+    "setup-models": "node scripts/setup-models.js",
+    "verify-models": "node scripts/verify-models.js",
+    "update-models": "node scripts/update-models.js"
+  }
+}
+```
+
+#### **Task 1.6.3: Update .gitignore to exclude all model files and build artifacts**
+
+**Implementation Details:**
+- ✅ **COMPLETED** - Enhanced `.gitignore` with comprehensive exclusions
+- Added patterns for all common AI model file formats
+- Excluded model cache directories and temporary files
+- Added build artifact exclusions for both Rust and Node.js
+- Included OS-specific temporary files and caches
+
+**Verification Steps:**
+- Run `git status` to ensure no large files are tracked
+- Test with sample model files to verify exclusion
+- Validate that essential project files are still tracked
+
+#### **Task 1.6.4: Create contributor setup guide for local model installation**
+
+**Implementation Details:**
+- ✅ **COMPLETED** - Comprehensive README.md with setup instructions
+- Document system requirements and prerequisites
+- Provide step-by-step model installation guide
+- Include troubleshooting section for common issues
+- Create platform-specific setup instructions
+
+**Additional Documentation Needed:**
+- `CONTRIBUTING.md` - Detailed contributor guidelines
+- `docs/MODEL_SETUP.md` - Advanced model configuration
+- `docs/TROUBLESHOOTING.md` - Common issues and solutions
+
+**Setup Verification:**
+```bash
+# Automated setup verification
+npm run verify-setup
+# Should check:
+# - Node.js and Rust versions
+# - Model availability and integrity
+# - Build system functionality
+# - Test suite execution
+```
+
+#### **Task 1.6.5: Implement CI/CD pipeline that handles model dependencies**
+
+**Implementation Details:**
+- Create GitHub Actions workflow for automated builds
+- Implement model caching strategy for CI environments
+- Set up matrix builds for different platforms (Windows, macOS, Linux)
+- Configure model download in CI without storing in repository
+- Implement build artifact caching for faster CI runs
+
+**GitHub Actions Workflow:**
+```yaml
+# .github/workflows/ci.yml
+name: CI/CD Pipeline
+on: [push, pull_request]
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+      - name: Cache Models
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/project-yarn/models
+          key: models-${{ runner.os }}-${{ hashFiles('models.config.json') }}
+      - name: Setup Models
+        run: npm run setup-models
+      - name: Run Tests
+        run: npm run test:all
+      - name: Build Application
+        run: npm run tauri build
+```
+
+**Model Caching Strategy:**
+- Use GitHub Actions cache for model files
+- Implement cache invalidation based on model version
+- Fallback to fresh download if cache is corrupted
+
+#### **Task 1.6.6: Create model versioning and update system**
+
+**Implementation Details:**
+- Implement semantic versioning for AI models
+- Create model update notification system
+- Implement incremental model updates when possible
+- Add model compatibility checking with application versions
+- Create rollback mechanism for problematic model updates
+
+**Model Version Management:**
+```rust
+// Model version tracking
+#[derive(Serialize, Deserialize)]
+pub struct ModelVersion {
+    pub model_id: String,
+    pub version: String,
+    pub checksum: String,
+    pub download_url: String,
+    pub compatibility: Vec<String>, // App version compatibility
+    pub release_date: DateTime<Utc>,
+    pub changelog: String,
+}
+
+pub struct ModelUpdateManager {
+    pub async fn check_for_updates(&self) -> Result<Vec<ModelUpdate>, UpdateError>
+    pub async fn update_model(&self, model_id: &str) -> Result<(), UpdateError>
+    pub async fn rollback_model(&self, model_id: &str) -> Result<(), UpdateError>
+}
+```
+
+**Update Notification System:**
+- Background check for model updates
+- User notification for available updates
+- Automatic update option with user consent
+- Update progress tracking and error handling
+
+**Model Registry Structure:**
+```json
+{
+  "models": {
+    "phi-3-mini": {
+      "current_version": "1.0.0",
+      "versions": {
+        "1.0.0": {
+          "checksum": "sha256:...",
+          "download_url": "https://...",
+          "size_bytes": 2147483648,
+          "compatibility": [">=0.1.0"]
+        }
+      }
+    }
+  }
+}
+```
+
 ## **Section 2: Phase 2 Task Plan — AI-Forward Enhancements**
 
 With the core architectural risks retired in Phase 1, Phase 2 focuses on building the advanced AI and structured workflow features that constitute Project Yarn's primary value proposition. This phase will transform the application from a basic editor into an intelligent "IDE for Documents".1

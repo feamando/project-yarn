@@ -1,0 +1,40 @@
+# Example model configuration file
+# This file shows the structure for configuring AI models
+# Copy this to your app data directory and customize as needed
+
+cache_dir = "./models"
+registry_url = "https://huggingface.co"
+
+[models.phi-3-mini]
+id = "phi-3-mini"
+name = "Microsoft Phi-3 Mini"
+version = "1.0.0"
+description = "Lightweight language model for autocomplete and text generation"
+download_url = "https://huggingface.co/microsoft/Phi-3-mini-4k-instruct-onnx/resolve/main/cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4/phi3-mini-4k-instruct-cpu-int4-rtn-block-32-acc-level-4.onnx"
+checksum = ""  # SHA256 checksum - will be updated when available
+size_bytes = 2147483648  # ~2GB
+format = "ONNX"
+compatibility = [">=0.1.0"]
+
+[models.phi-3-mini-128k]
+id = "phi-3-mini-128k"
+name = "Microsoft Phi-3 Mini 128K"
+version = "1.0.0"
+description = "Extended context version of Phi-3 Mini with 128K context length"
+download_url = "https://huggingface.co/microsoft/Phi-3-mini-128k-instruct-onnx/resolve/main/cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4/phi3-mini-128k-instruct-cpu-int4-rtn-block-32-acc-level-4.onnx"
+checksum = ""  # SHA256 checksum - will be updated when available
+size_bytes = 2147483648  # ~2GB
+format = "ONNX"
+compatibility = [">=0.1.0"]
+
+# Add more models as needed
+# [models.your-model-id]
+# id = "your-model-id"
+# name = "Your Model Name"
+# version = "1.0.0"
+# description = "Description of your model"
+# download_url = "https://example.com/path/to/model.onnx"
+# checksum = "sha256-hash-here"
+# size_bytes = 1073741824  # Size in bytes
+# format = "ONNX"  # or "SafeTensors", "PyTorch", "Bin"
+# compatibility = [">=0.1.0"]

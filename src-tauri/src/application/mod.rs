@@ -5,8 +5,10 @@
 pub mod services;
 pub mod commands;
 pub mod use_cases;
+pub mod model_commands;
 
 // Re-export commonly used types
 pub use services::*;
 pub use commands::*;
 pub use use_cases::*;
+pub use model_commands::*;

@@ -1,0 +1,106 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2024-01-01T00:00:00.000Z",
+  "registry": {
+    "primary": "https://huggingface.co",
+    "fallback": "https://github.com/project-yarn/models/releases"
+  },
+  "models": {
+    "phi-3-mini": {
+      "id": "phi-3-mini",
+      "name": "Microsoft Phi-3 Mini",
+      "version": "1.0.0",
+      "description": "Lightweight language model for autocomplete and text generation",
+      "category": "language-model",
+      "tags": ["autocomplete", "text-generation", "lightweight"],
+      "variants": {
+        "cpu-int4": {
+          "name": "CPU INT4 Quantized",
+          "url": "https://huggingface.co/microsoft/Phi-3-mini-4k-instruct-onnx/resolve/main/cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4/phi3-mini-4k-instruct-cpu-int4-rtn-block-32-acc-level-4.onnx",
+          "size": 2147483648,
+          "checksum": "",
+          "requirements": {
+            "ram": 4,
+            "disk": 3,
+            "cpu": "x86_64"
+          },
+          "performance": {
+            "speed": "fast",
+            "accuracy": "good",
+            "memory_usage": "low"
+          }
+        },
+        "cpu-fp16": {
+          "name": "CPU FP16",
+          "url": "https://huggingface.co/microsoft/Phi-3-mini-4k-instruct-onnx/resolve/main/cpu_and_mobile/cpu-fp16/phi3-mini-4k-instruct-cpu-fp16.onnx",
+          "size": 7516192768,
+          "checksum": "",
+          "requirements": {
+            "ram": 8,
+            "disk": 8,
+            "cpu": "x86_64"
+          },
+          "performance": {
+            "speed": "medium",
+            "accuracy": "high",
+            "memory_usage": "medium"
+          }
+        }
+      },
+      "defaultVariant": "cpu-int4",
+      "priority": 1,
+      "compatibility": {
+        "minVersion": "0.1.0",
+        "platforms": ["windows", "macos", "linux"],
+        "architectures": ["x86_64", "arm64"]
+      }
+    },
+    "phi-3-mini-128k": {
+      "id": "phi-3-mini-128k",
+      "name": "Microsoft Phi-3 Mini 128K",
+      "version": "1.0.0",
+      "description": "Extended context version of Phi-3 Mini with 128K context length",
+      "category": "language-model",
+      "tags": ["autocomplete", "text-generation", "long-context"],
+      "variants": {
+        "cpu-int4": {
+          "name": "CPU INT4 Quantized",
+          "url": "https://huggingface.co/microsoft/Phi-3-mini-128k-instruct-onnx/resolve/main/cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4/phi3-mini-128k-instruct-cpu-int4-rtn-block-32-acc-level-4.onnx",
+          "size": 2147483648,
+          "checksum": "",
+          "requirements": {
+            "ram": 6,
+            "disk": 3,
+            "cpu": "x86_64"
+          },
+          "performance": {
+            "speed": "fast",
+            "accuracy": "good",
+            "memory_usage": "medium"
+          }
+        }
+      },
+      "defaultVariant": "cpu-int4",
+      "priority": 2,
+      "compatibility": {
+        "minVersion": "0.1.0",
+        "platforms": ["windows", "macos", "linux"],
+        "architectures": ["x86_64", "arm64"]
+      }
+    }
+  },
+  "settings": {
+    "autoUpdate": false,
+    "updateCheckInterval": "weekly",
+    "maxConcurrentDownloads": 2,
+    "retryAttempts": 3,
+    "retryDelay": 2000,
+    "verifyChecksums": true,
+    "cleanupOldVersions": true
+  },
+  "paths": {
+    "modelsDirectory": "./models",
+    "tempDirectory": "./temp/models",
+    "backupDirectory": "./backups/models"
+  }
+}
