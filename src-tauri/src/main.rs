@@ -16,6 +16,27 @@ use application::model_commands::{
     clear_model_cache, get_model_path
 };
 
+// Import AI credential management commands
+use application::ai_credential_commands::{
+    set_bedrock_credentials, validate_bedrock_credentials,
+    set_gemini_credentials, validate_gemini_credentials,
+    select_active_provider, list_ai_providers, get_active_provider_info
+};
+
+// Import hybrid RAG commands
+use commands::hybrid_rag::{
+    retrieve_context, test_hybrid_rag, get_hybrid_rag_config,
+    validate_hybrid_rag_config, get_hybrid_rag_stats
+};
+
+// Import updater commands
+use commands::updater::{
+    check_for_updates, install_update, get_app_version, restart_app
+};
+
+// Import AI provider manager
+use application::ai_provider_manager::initialize_ai_provider_manager;
+
 // Import model versioning commands
 mod commands;
 use commands::model_versioning::{
@@ -28,6 +49,7 @@ use commands::model_versioning::{
 mod models;
 use application::services::{ProjectService, DocumentService, LocalAiService};
 use infrastructure::{DatabaseManager, FilesystemManager, CredentialManager};
+use infrastructure::db_layer::DatabaseConnection;
 use std::sync::Arc;
 
 // Initialize tracing for AI service logging
@@ -38,6 +60,7 @@ fn main() {
     tracing_subscriber::fmt::init();
     
     tauri::Builder::default()
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .invoke_handler(tauri::generate_handler![
             greet,
             create_project,
@@ -60,13 +83,44 @@ fn main() {
             get_model_version_history,
             list_installed_models,
             get_model_registry,
-            enable_auto_updates
+            enable_auto_updates,
+            // AI credential management commands
+            set_bedrock_credentials,
+            validate_bedrock_credentials,
+            set_gemini_credentials,
+            validate_gemini_credentials,
+            select_active_provider,
+            list_ai_providers,
+            get_active_provider_info,
+            // Hybrid RAG commands
+            retrieve_context,
+            test_hybrid_rag,
+            get_hybrid_rag_config,
+            validate_hybrid_rag_config,
+            get_hybrid_rag_stats,
+            // Updater commands
+            check_for_updates,
+            install_update,
+            get_app_version,
+            restart_app
         ])
         .setup(|app| {
             // Initialize infrastructure managers
             let db_manager = Arc::new(DatabaseManager::new());
             let fs_manager = Arc::new(FilesystemManager::new());
             let credential_manager = Arc::new(CredentialManager::new());
+            
+            // Initialize database connection for hybrid RAG
+            let db_path = "project_yarn.db"; // In production, this should be configurable
+            let db_connection = DatabaseConnection::new(db_path)
+                .expect("Failed to create database connection");
+            
+            // Run database migrations
+            use infrastructure::db_layer::MigrationManager;
+            let migration_manager = MigrationManager::new(&db_connection);
+            if let Err(e) = migration_manager.migrate() {
+                eprintln!("Failed to run database migrations: {}", e);
+            }
             
             // Initialize services with dependencies
             let project_service = ProjectService::new(db_manager.clone(), fs_manager.clone());
@@ -76,6 +130,11 @@ fn main() {
             // Initialize and register model manager
             if let Err(e) = initialize_model_manager(app) {
                 eprintln!("Failed to initialize model manager: {}", e);
+            }
+            
+            // Initialize AI provider manager
+            if let Err(e) = initialize_ai_provider_manager(app) {
+                eprintln!("Failed to initialize AI provider manager: {}", e);
             }
             
             // Initialize model versioning configuration
@@ -99,6 +158,7 @@ fn main() {
             app.manage(fs_manager);
             app.manage(credential_manager);
             app.manage(versioning_config);
+            app.manage(db_connection);
             
             Ok(())
         })

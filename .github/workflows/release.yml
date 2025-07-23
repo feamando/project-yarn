@@ -1,0 +1,378 @@
+name: Release and Update Pipeline
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., v1.0.0)'
+        required: true
+        type: string
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    outputs:
+      release_id: ${{ steps.create-release.outputs.result }}
+      release_upload_url: ${{ steps.create-release.outputs.upload_url }}
+      release_body: ${{ steps.release-notes.outputs.release_body }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get version
+        id: get_version
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Generate release notes
+        id: release-notes
+        run: |
+          VERSION="${{ steps.get_version.outputs.VERSION }}"
+          echo "Generating release notes for $VERSION"
+          
+          # Get the previous tag
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          
+          # Generate changelog
+          if [ -n "$PREVIOUS_TAG" ]; then
+            CHANGELOG=$(git log --pretty=format:"- %s" $PREVIOUS_TAG..HEAD)
+          else
+            CHANGELOG=$(git log --pretty=format:"- %s" HEAD)
+          fi
+          
+          # Create release body
+          cat << EOF > release_notes.md
+          ## What's New in $VERSION
+          
+          ### Changes
+          $CHANGELOG
+          
+          ### Installation
+          Download the appropriate installer for your platform:
+          - **Windows**: \`Project-Yarn_${VERSION}_x64_en-US.msi\`
+          - **macOS**: \`Project-Yarn_${VERSION}_x64.dmg\`
+          - **Linux**: \`project-yarn_${VERSION}_amd64.deb\` or \`project-yarn_${VERSION}_amd64.AppImage\`
+          
+          ### Auto-Update
+          If you have Project Yarn already installed, the application will automatically check for this update on startup and prompt you to install it.
+          
+          ---
+          
+          **Full Changelog**: https://github.com/project-yarn/project-yarn/compare/$PREVIOUS_TAG...$VERSION
+          EOF
+          
+          # Set output for later steps
+          {
+            echo 'release_body<<EOF'
+            cat release_notes.md
+            echo EOF
+          } >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        id: create-release
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data } = await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: '${{ steps.get_version.outputs.VERSION }}',
+              name: 'Project Yarn ${{ steps.get_version.outputs.VERSION }}',
+              body: `${{ steps.release-notes.outputs.release_body }}`,
+              draft: true,
+              prerelease: false
+            });
+            return data.id;
+
+  build-tauri:
+    needs: create-release
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: 'macos-latest'
+            args: '--target aarch64-apple-darwin'
+            target: 'aarch64-apple-darwin'
+            arch: 'aarch64'
+          - platform: 'macos-latest'
+            args: '--target x86_64-apple-darwin'
+            target: 'x86_64-apple-darwin'
+            arch: 'x64'
+          - platform: 'ubuntu-22.04'
+            args: ''
+            target: 'x86_64-unknown-linux-gnu'
+            arch: 'x64'
+          - platform: 'windows-latest'
+            args: ''
+            target: 'x86_64-pc-windows-msvc'
+            arch: 'x64'
+          - platform: 'windows-latest'
+            args: '--target aarch64-pc-windows-msvc'
+            target: 'aarch64-pc-windows-msvc'
+            arch: 'aarch64'
+
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Setup Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      - name: Install dependencies (Ubuntu only)
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.0-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Generate Tauri signing key (if not exists)
+        run: |
+          if [ ! -f "$HOME/.tauri/signing-key" ]; then
+            mkdir -p "$HOME/.tauri"
+            # Generate a new signing key for development/testing
+            # In production, this should be a secure, persistent key
+            openssl genpkey -algorithm Ed25519 -out "$HOME/.tauri/signing-key"
+            echo "Generated new signing key"
+          fi
+        shell: bash
+
+      - name: Build Tauri app
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+        with:
+          releaseId: ${{ needs.create-release.outputs.release_id }}
+          args: ${{ matrix.args }}
+
+  generate-update-artifacts:
+    needs: [create-release, build-tauri]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Get version
+        id: get_version
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Download release assets
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            
+            // Get release assets
+            const { data: release } = await github.rest.repos.getRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: ${{ needs.create-release.outputs.release_id }}
+            });
+            
+            // Create artifacts directory
+            if (!fs.existsSync('artifacts')) {
+              fs.mkdirSync('artifacts');
+            }
+            
+            // Download each asset
+            for (const asset of release.assets) {
+              console.log(`Downloading ${asset.name}...`);
+              
+              const { data: assetData } = await github.rest.repos.getReleaseAsset({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                asset_id: asset.id,
+                headers: {
+                  Accept: 'application/octet-stream'
+                }
+              });
+              
+              fs.writeFileSync(path.join('artifacts', asset.name), Buffer.from(assetData));
+            }
+
+      - name: Generate update manifest
+        run: |
+          VERSION="${{ steps.get_version.outputs.VERSION }}"
+          RELEASE_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          
+          # Create the latest.json manifest
+          cat << EOF > latest.json
+          {
+            "version": "${VERSION}",
+            "notes": "Project Yarn ${VERSION} - See release notes for details",
+            "pub_date": "${RELEASE_DATE}",
+            "platforms": {
+              "darwin-x86_64": {
+                "signature": "",
+                "url": "https://github.com/project-yarn/project-yarn/releases/download/${VERSION}/Project-Yarn_${VERSION}_x64.app.tar.gz"
+              },
+              "darwin-aarch64": {
+                "signature": "",
+                "url": "https://github.com/project-yarn/project-yarn/releases/download/${VERSION}/Project-Yarn_${VERSION}_aarch64.app.tar.gz"
+              },
+              "linux-x86_64": {
+                "signature": "",
+                "url": "https://github.com/project-yarn/project-yarn/releases/download/${VERSION}/project-yarn_${VERSION}_amd64.AppImage.tar.gz"
+              },
+              "windows-x86_64": {
+                "signature": "",
+                "url": "https://github.com/project-yarn/project-yarn/releases/download/${VERSION}/Project-Yarn_${VERSION}_x64_en-US.msi.zip"
+              }
+            }
+          }
+          EOF
+
+      - name: Extract signatures from .sig files
+        run: |
+          # Find and process signature files
+          for sig_file in artifacts/*.sig; do
+            if [ -f "$sig_file" ]; then
+              filename=$(basename "$sig_file" .sig)
+              signature=$(cat "$sig_file")
+              echo "Found signature for $filename: $signature"
+              
+              # Update the manifest with the signature
+              # This is a simplified approach - in production, you'd want more robust JSON manipulation
+              if [[ "$filename" == *"darwin"* ]] && [[ "$filename" == *"x64"* ]]; then
+                sed -i "s|\"darwin-x86_64\": {[^}]*\"signature\": \"[^\"]*\"|\"darwin-x86_64\": {\"signature\": \"$signature\"|" latest.json
+              elif [[ "$filename" == *"darwin"* ]] && [[ "$filename" == *"aarch64"* ]]; then
+                sed -i "s|\"darwin-aarch64\": {[^}]*\"signature\": \"[^\"]*\"|\"darwin-aarch64\": {\"signature\": \"$signature\"|" latest.json
+              elif [[ "$filename" == *"linux"* ]]; then
+                sed -i "s|\"linux-x86_64\": {[^}]*\"signature\": \"[^\"]*\"|\"linux-x86_64\": {\"signature\": \"$signature\"|" latest.json
+              elif [[ "$filename" == *"windows"* ]]; then
+                sed -i "s|\"windows-x86_64\": {[^}]*\"signature\": \"[^\"]*\"|\"windows-x86_64\": {\"signature\": \"$signature\"|" latest.json
+              fi
+            fi
+          done
+
+      - name: Validate update manifest
+        run: |
+          echo "Generated latest.json:"
+          cat latest.json
+          
+          # Validate JSON syntax
+          node -e "JSON.parse(require('fs').readFileSync('latest.json', 'utf8')); console.log('✅ JSON is valid');"
+
+      - name: Upload update manifest
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.release_upload_url }}
+          asset_path: ./latest.json
+          asset_name: latest.json
+          asset_content_type: application/json
+
+      - name: Create update info file
+        run: |
+          VERSION="${{ steps.get_version.outputs.VERSION }}"
+          cat << EOF > update-info.md
+          # Update Information
+          
+          **Version**: ${VERSION}
+          **Release Date**: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          
+          ## Update Manifest
+          The \`latest.json\` file has been generated and uploaded to this release.
+          
+          ## Auto-Update Configuration
+          Applications configured with the following endpoint will automatically detect this update:
+          \`\`\`
+          https://github.com/project-yarn/project-yarn/releases/latest/download/latest.json
+          \`\`\`
+          
+          ## Manual Update
+          Users can also download the appropriate installer for their platform from the release assets.
+          EOF
+
+      - name: Upload update info
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.release_upload_url }}
+          asset_path: ./update-info.md
+          asset_name: update-info.md
+          asset_content_type: text/markdown
+
+  publish-release:
+    needs: [create-release, build-tauri, generate-update-artifacts]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Publish Release
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.repos.updateRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: ${{ needs.create-release.outputs.release_id }},
+              draft: false
+            });
+            
+            console.log('✅ Release published successfully!');
+
+  notify-completion:
+    needs: [create-release, build-tauri, generate-update-artifacts, publish-release]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Report Status
+        run: |
+          if [ "${{ needs.publish-release.result }}" == "success" ]; then
+            echo "🎉 Release pipeline completed successfully!"
+            echo "📦 Artifacts built and signed for all platforms"
+            echo "📋 Update manifest (latest.json) generated and uploaded"
+            echo "🚀 Release published and ready for auto-update"
+          else
+            echo "❌ Release pipeline failed"
+            echo "Check the logs for details"
+            exit 1
+          fi

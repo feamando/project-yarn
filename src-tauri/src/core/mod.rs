@@ -5,8 +5,10 @@
 pub mod entities;
 pub mod value_objects;
 pub mod local_ai_engine;
+pub mod transitions;
 
 // Re-export commonly used types
 pub use entities::*;
 pub use value_objects::*;
 pub use local_ai_engine::*;
+pub use transitions::*;

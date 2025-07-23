@@ -63,19 +63,27 @@ jobs:
 
   # Test job - runs tests with model dependencies
   test:
-    name: 'Test (${{ matrix.platform }})'
+    name: 'Test (${{ matrix.platform }} - ${{ matrix.target }})'
     needs: validate
     strategy:
       fail-fast: false
       matrix:
-        platform: [ubuntu-latest, windows-latest, macos-latest]
         include:
           - platform: ubuntu-latest
             os_name: linux
+            target: x86_64-unknown-linux-gnu
           - platform: windows-latest
             os_name: windows
+            target: x86_64-pc-windows-msvc
+          - platform: windows-latest
+            os_name: windows
+            target: aarch64-pc-windows-msvc
           - platform: macos-latest
             os_name: macos
+            target: x86_64-apple-darwin
+          - platform: macos-latest
+            os_name: macos
+            target: aarch64-apple-darwin
 
     runs-on: ${{ matrix.platform }}
     steps:
@@ -92,6 +100,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt, clippy
+          targets: ${{ matrix.target }}
 
       - name: Rust cache
         uses: swatinem/rust-cache@v2

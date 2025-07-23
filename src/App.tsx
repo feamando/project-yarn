@@ -4,13 +4,94 @@ import { Button } from "@/components/ui/button";
 import { FileText, MessageSquare, Folder, Settings, Plus } from "lucide-react";
 import { MarkdownEditor } from "@/components/editor/MarkdownEditor";
 import { ProjectCreationModal } from "@/components/ProjectCreationModal";
+import { AISettings } from "@/components/AISettings";
+import { AIModelSelector } from "@/components/AIModelSelector";
+import { StreamingChatUI } from "@/components/StreamingChatUI";
+import { DocumentTransformationUI } from "@/components/DocumentTransformationUI";
+import { CommandPalette } from "@/components/CommandPalette";
+import { UpdaterDialog } from "./components/UpdaterDialog";
+import { UpdaterService, UpdateStatus } from "./services/updaterService";
 import { useAppStore } from "@/stores/useAppStore";
 import { useEffect, useState } from "react";
 
 function App() {
   const { addProject, addDocument, setCurrentProject, setCurrentDocument, projects } = useAppStore();
+  const currentDocument = useAppStore(state => state.documents.find(doc => doc.id === state.currentDocumentId));
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
+  const [currentView, setCurrentView] = useState<'editor' | 'settings'>('editor');
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const [isTransformationUIOpen, setIsTransformationUIOpen] = useState(false);
+  const [selectedDocumentForTransformation, setSelectedDocumentForTransformation] = useState<any>(null);
+  const [isUpdaterDialogOpen, setIsUpdaterDialogOpen] = useState(false);
+  const [updateStatus, setUpdateStatus] = useState<UpdateStatus | undefined>(undefined);
+  const [updaterService] = useState(() => UpdaterService.getInstance());
   
+  // Handle keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Command palette (Ctrl+K or Cmd+K)
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        setIsCommandPaletteOpen(true);
+      }
+      // Transform document (Ctrl+T or Cmd+T)
+      if ((e.ctrlKey || e.metaKey) && e.key === 't' && currentDocument) {
+        e.preventDefault();
+        setSelectedDocumentForTransformation(currentDocument);
+        setIsTransformationUIOpen(true);
+      }
+      // Settings (Ctrl+, or Cmd+,)
+      if ((e.ctrlKey || e.metaKey) && e.key === ',') {
+        e.preventDefault();
+        setCurrentView('settings');
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [currentDocument]);
+
+  // Handle transformation UI actions
+  const handleShowTransformation = (document: any) => {
+    setSelectedDocumentForTransformation(document);
+    setIsTransformationUIOpen(true);
+  };
+
+  const handleTransformationComplete = (document: any, newState: string) => {
+    // Update document state in store
+    console.log('Document transformed:', document, 'New state:', newState);
+    // TODO: Update document state in the store
+  };
+
+  // Check for updates on startup
+  useEffect(() => {
+    const checkForUpdatesOnStartup = async () => {
+      try {
+        const status = await updaterService.checkForUpdatesOnStartup();
+        if (status && status.available) {
+          setUpdateStatus(status);
+          setIsUpdaterDialogOpen(true);
+        }
+      } catch (error) {
+        console.error('Failed to check for updates on startup:', error);
+      }
+    };
+
+    checkForUpdatesOnStartup();
+  }, [updaterService]);
+
+  // Subscribe to update status changes
+  useEffect(() => {
+    const unsubscribe = updaterService.onUpdateStatusChange((status) => {
+      setUpdateStatus(status);
+      if (status.available) {
+        setIsUpdaterDialogOpen(true);
+      }
+    });
+
+    return unsubscribe;
+  }, [updaterService]);
+
   // Initialize with demo data on first load
   useEffect(() => {
     if (projects.length === 0) {
@@ -57,64 +138,72 @@ function App() {
             <Plus className="h-4 w-4" />
             New Project
           </Button>
-          <Button variant="ghost" size="sm">
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => setCurrentView(currentView === 'settings' ? 'editor' : 'settings')}
+            className={currentView === 'settings' ? 'bg-muted' : ''}
+          >
             <Settings className="h-4 w-4" />
           </Button>
         </div>
       </header>
 
-      {/* Main Three-Panel Layout */}
+      {/* Main Content Area */}
       <div className="flex-1 overflow-hidden">
-        <PanelGroup direction="horizontal">
-          {/* Left Panel - File Tree */}
-          <Panel defaultSize={20} minSize={15} maxSize={35}>
-            <div className="h-full bg-muted/20 border-r border-border">
-              <div className="p-4 border-b border-border">
-                <div className="flex items-center space-x-2">
-                  <Folder className="h-4 w-4 text-primary" />
-                  <span className="font-medium text-sm">Explorer</span>
+        {currentView === 'settings' ? (
+          <AISettings />
+        ) : (
+          <PanelGroup direction="horizontal">
+            {/* Left Panel - File Tree */}
+            <Panel defaultSize={20} minSize={15} maxSize={35}>
+              <div className="h-full bg-muted/20 border-r border-border">
+                <div className="p-4 border-b border-border">
+                  <div className="flex items-center space-x-2">
+                    <Folder className="h-4 w-4 text-primary" />
+                    <span className="font-medium text-sm">Explorer</span>
+                  </div>
+                </div>
+                <div className="p-4">
+                  <Card className="mb-4">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-sm">Project Tree</CardTitle>
+                      <CardDescription className="text-xs">
+                        File explorer will be implemented here
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2 text-sm text-muted-foreground">
+                        <div className="flex items-center space-x-2">
+                          <FileText className="h-3 w-3" />
+                          <span>README.md</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <FileText className="h-3 w-3" />
+                          <span>document.md</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Folder className="h-3 w-3" />
+                          <span>drafts/</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
               </div>
-              <div className="p-4">
-                <Card className="mb-4">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm">Project Tree</CardTitle>
-                    <CardDescription className="text-xs">
-                      File explorer will be implemented here
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2 text-sm text-muted-foreground">
-                      <div className="flex items-center space-x-2">
-                        <FileText className="h-3 w-3" />
-                        <span>README.md</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <FileText className="h-3 w-3" />
-                        <span>document.md</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Folder className="h-3 w-3" />
-                        <span>drafts/</span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-          </Panel>
+            </Panel>
 
-          <PanelResizeHandle className="w-2 bg-border hover:bg-accent transition-colors" />
+            <PanelResizeHandle className="w-2 bg-border hover:bg-accent transition-colors" />
 
-          {/* Central Panel - Editor */}
-          <Panel defaultSize={60} minSize={40}>
-            <MarkdownEditor className="h-full" />
-          </Panel>
+            {/* Central Panel - Editor */}
+            <Panel defaultSize={60} minSize={40}>
+              <MarkdownEditor className="h-full" />
+            </Panel>
 
-          <PanelResizeHandle className="w-2 bg-border hover:bg-accent transition-colors" />
+            <PanelResizeHandle className="w-2 bg-border hover:bg-accent transition-colors" />
 
-          {/* Right Panel - AI Chat */}
-          <Panel defaultSize={20} minSize={15} maxSize={35}>
+            {/* Right Panel - AI Chat */}
+            <Panel defaultSize={20} minSize={15} maxSize={35}>
             <div className="h-full bg-muted/20 border-l border-border">
               <div className="p-4 border-b border-border">
                 <div className="flex items-center space-x-2">
@@ -123,38 +212,28 @@ function App() {
                 </div>
               </div>
               <div className="p-4">
+                {/* AI Model Selector */}
                 <Card className="mb-4">
                   <CardHeader className="pb-3">
-                    <CardTitle className="text-sm">Chat Interface</CardTitle>
+                    <CardTitle className="text-sm">AI Configuration</CardTitle>
                     <CardDescription className="text-xs">
-                      AI chat functionality will be implemented here
+                      Select your AI model and provider
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-3">
-                      <div className="p-3 bg-muted rounded-lg">
-                        <p className="text-xs text-muted-foreground">
-                          AI: Hello! I'm your writing assistant. How can I help you today?
-                        </p>
-                      </div>
-                      <div className="space-y-2">
-                        <Button variant="outline" size="sm" className="w-full justify-start text-xs">
-                          Help me write
-                        </Button>
-                        <Button variant="outline" size="sm" className="w-full justify-start text-xs">
-                          Review document
-                        </Button>
-                        <Button variant="outline" size="sm" className="w-full justify-start text-xs">
-                          Suggest improvements
-                        </Button>
-                      </div>
-                    </div>
+                    <AIModelSelector />
                   </CardContent>
                 </Card>
+
+                {/* Streaming Chat Interface */}
+                <div className="flex-1 flex flex-col min-h-0">
+                  <StreamingChatUI />
+                </div>
               </div>
             </div>
-          </Panel>
-        </PanelGroup>
+            </Panel>
+          </PanelGroup>
+        )}
       </div>
 
       {/* Status Bar */}
@@ -173,6 +252,36 @@ function App() {
       <ProjectCreationModal 
         open={isProjectModalOpen} 
         onOpenChange={setIsProjectModalOpen} 
+      />
+
+      {/* Command Palette */}
+      <CommandPalette
+        isOpen={isCommandPaletteOpen}
+        onClose={() => setIsCommandPaletteOpen(false)}
+        currentDocument={currentDocument}
+        onShowTransformation={handleShowTransformation}
+        onShowSettings={() => setCurrentView('settings')}
+      />
+
+      {/* Document Transformation UI */}
+      {isTransformationUIOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <DocumentTransformationUI
+            document={selectedDocumentForTransformation as any}
+            onTransformationComplete={handleTransformationComplete}
+            onClose={() => {
+              setIsTransformationUIOpen(false);
+              setSelectedDocumentForTransformation(null);
+            }}
+          />
+        </div>
+      )}
+
+      {/* Auto-Updater Dialog */}
+      <UpdaterDialog
+        isOpen={isUpdaterDialogOpen}
+        onClose={() => setIsUpdaterDialogOpen(false)}
+        updateStatus={updateStatus}
       />
     </div>
   );

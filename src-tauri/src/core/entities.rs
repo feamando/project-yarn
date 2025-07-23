@@ -38,15 +38,20 @@ pub struct Document {
 
 /// Document state as per the FSM design from the Technical Strategy
 /// Represents the lifecycle states for structured document workflows
+/// Enforces the workflow: Memo → PRFAQ → PRD → EpicBreakdown
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum DocumentState {
-    /// Initial state - document is being drafted
+    /// Initial state - Problem or idea memo
+    Memo,
+    /// Press Release FAQ - customer-facing document
+    PRFAQ,
+    /// Product Requirements Document - detailed specification
+    PRD,
+    /// Epic Breakdown - implementation planning document
+    EpicBreakdown,
+    /// Draft state for new documents before classification
     Draft,
-    /// Document is under review
-    InReview,
-    /// Document has been published/finalized
-    Published,
-    /// Document has been archived
+    /// Archived state for completed or obsolete documents
     Archived,
 }
 
@@ -111,54 +116,28 @@ impl Document {
     }
     
     /// Check if document can transition to a given state
+    /// Uses the centralized transitions module for validation
     pub fn can_transition_to(&self, target_state: &DocumentState) -> bool {
-        match (&self.state, target_state) {
-            // Draft can go to any state
-            (DocumentState::Draft, _) => true,
-            // InReview can go to Published or back to Draft
-            (DocumentState::InReview, DocumentState::Published) => true,
-            (DocumentState::InReview, DocumentState::Draft) => true,
-            // Published can be archived or go back to draft for editing
-            (DocumentState::Published, DocumentState::Archived) => true,
-            (DocumentState::Published, DocumentState::Draft) => true,
-            // Archived can be reactivated to draft
-            (DocumentState::Archived, DocumentState::Draft) => true,
-            // All other transitions are invalid
-            _ => false,
-        }
+        super::transitions::DocumentTransitions::is_valid_transition(&self.state, target_state)
     }
 }
 
 /// Implementation for DocumentState
 impl DocumentState {
     /// Get all possible next states from the current state
+    /// Uses the centralized transitions module for consistency
     pub fn possible_transitions(&self) -> Vec<DocumentState> {
-        match self {
-            DocumentState::Draft => vec![
-                DocumentState::InReview,
-                DocumentState::Published,
-                DocumentState::Archived,
-            ],
-            DocumentState::InReview => vec![
-                DocumentState::Draft,
-                DocumentState::Published,
-            ],
-            DocumentState::Published => vec![
-                DocumentState::Draft,
-                DocumentState::Archived,
-            ],
-            DocumentState::Archived => vec![
-                DocumentState::Draft,
-            ],
-        }
+        super::transitions::DocumentTransitions::get_valid_transitions(self)
     }
     
     /// Get string representation of the state
     pub fn as_str(&self) -> &'static str {
         match self {
+            DocumentState::Memo => "memo",
+            DocumentState::PRFAQ => "prfaq",
+            DocumentState::PRD => "prd",
+            DocumentState::EpicBreakdown => "epic_breakdown",
             DocumentState::Draft => "draft",
-            DocumentState::InReview => "in_review",
-            DocumentState::Published => "published",
             DocumentState::Archived => "archived",
         }
     }
@@ -166,9 +145,11 @@ impl DocumentState {
     /// Create DocumentState from string
     pub fn from_str(s: &str) -> Option<Self> {
         match s.to_lowercase().as_str() {
+            "memo" => Some(DocumentState::Memo),
+            "prfaq" => Some(DocumentState::PRFAQ),
+            "prd" => Some(DocumentState::PRD),
+            "epic_breakdown" => Some(DocumentState::EpicBreakdown),
             "draft" => Some(DocumentState::Draft),
-            "in_review" => Some(DocumentState::InReview),
-            "published" => Some(DocumentState::Published),
             "archived" => Some(DocumentState::Archived),
             _ => None,
         }

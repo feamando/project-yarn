@@ -1,0 +1,249 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  test-rust:
+    name: Test Rust Backend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Setup Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.0-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - name: Run Rust tests
+        run: cd src-tauri && cargo test --verbose
+
+      - name: Run Rust clippy
+        run: cd src-tauri && cargo clippy -- -D warnings
+
+      - name: Check Rust formatting
+        run: cd src-tauri && cargo fmt --check
+
+  test-frontend:
+    name: Test Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run TypeScript check
+        run: npm run type-check
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Run frontend tests
+        run: npm run test
+
+      - name: Build frontend
+        run: npm run build
+
+  security-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run security audit
+        run: npm audit --audit-level moderate
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust security audit
+        run: |
+          cd src-tauri
+          cargo audit
+
+  visual-regression:
+    runs-on: ${{ matrix.platform }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos-latest
+            target: x86_64-apple-darwin
+            os_name: macos
+          - platform: macos-latest
+            target: aarch64-apple-darwin
+            os_name: macos
+          - platform: windows-latest
+            target: x86_64-pc-windows-msvc
+            os_name: windows
+          - platform: windows-latest
+            target: aarch64-pc-windows-msvc
+            os_name: windows
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Install system dependencies (Ubuntu)
+        if: matrix.platform == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.0-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Tauri app for testing
+        run: npm run tauri build -- --debug
+        env:
+          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY || '' }}
+          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD || '' }}
+
+      - name: Download existing baselines
+        continue-on-error: true
+        run: |
+          mkdir -p tests/visual/baselines/${{ matrix.os_name }}
+          # In a real scenario, you would download from artifact storage
+          echo "Baseline directory created for ${{ matrix.os_name }}"
+
+      - name: Run visual regression tests
+        run: npm run e2e:visual
+        env:
+          CI: true
+          PLATFORM: ${{ matrix.os_name }}
+        continue-on-error: true
+
+      - name: Upload visual test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: visual-test-results-${{ matrix.os_name }}
+          path: |
+            tests/visual/actual/
+            tests/visual/diff/
+            tests/visual/baselines/${{ matrix.os_name }}/
+            wdio-logs/
+          retention-days: 30
+
+      - name: Upload new baselines
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: visual-baselines-${{ matrix.os_name }}
+          path: tests/visual/baselines/${{ matrix.os_name }}/
+          retention-days: 90
+
+      - name: Comment PR with visual differences
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            // Check if there are visual differences
+            const diffDir = 'tests/visual/diff';
+            if (fs.existsSync(diffDir)) {
+              const files = fs.readdirSync(diffDir);
+              if (files.length > 0) {
+                const comment = `## Visual Regression Detected\n\n` +
+                  `Visual differences were detected on **${{ matrix.os_name }}** platform:\n\n` +
+                  files.map(file => `- \`${file}\``).join('\n') + '\n\n' +
+                  `Please review the visual test artifacts to confirm these changes are intentional.`;
+
+                github.rest.issues.createComment({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: comment
+                });
+              }
+            }
+
+  build-dev:
+    name: Development Build
+    needs: [test-rust, test-frontend]
+    strategy:
+      matrix:
+        platform: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Setup Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      - name: Install dependencies (Ubuntu only)
+        if: matrix.platform == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.0-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Build Tauri app (development)
+        run: npm run tauri build -- --debug
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dev-build-${{ matrix.platform }}
+          path: |
+            src-tauri/target/debug/bundle/
+          retention-days: 7

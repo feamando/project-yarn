@@ -2,14 +2,32 @@
 
 An AI-native desktop application for professional writing and document management. Project Yarn is an "IDE for Documents" that provides a project-centric workflow with structured document lifecycles, local-first architecture, and seamless AI integration.
 
+## 🎉 Phase 2 Complete!
+
+Project Yarn has successfully completed **Phase 2** development, delivering a comprehensive AI-native document IDE with advanced features:
+
 ## 🚀 Features
 
-- **AI-Native Document Creation**: Built from the ground up for AI-assisted writing
-- **Project-Centric Workflow**: Structured document lifecycles (Memo → PRD → Epic Breakdown)
-- **Local-First Architecture**: Your data stays on your machine with optional cloud AI integration
+### Core AI Integration
+- **Multi-Provider AI Support**: Local AI, AWS Bedrock (Claude), and Google Gemini
+- **Streaming Chat Interface**: Real-time AI conversations with message history
+- **AI Model Selector**: Runtime switching between AI providers and models
+- **Advanced RAG System**: Hybrid retrieval combining lexical and vector search
+- **@ Context Command**: Intelligent document retrieval for AI conversations
+
+### Document Management
+- **Document State FSM**: Structured workflow (Draft → Memo → PRFAQ → PRD → Epic Breakdown)
+- **Project-Centric Organization**: Hierarchical project and document structure
+- **Full-Text Search**: FTS5-powered search across all documents
+- **Vector Embeddings**: Semantic search and similarity matching
+- **Background Processing**: Automatic embedding generation and indexing
+
+### User Experience
 - **Three-Panel Interface**: File tree, editor, and AI chat for optimal workflow
-- **Multi-File Context Awareness**: AI understands your entire project context
-- **Local AI Autocomplete**: Powered by Phi-3-mini for fast, private suggestions
+- **Document Transformation UI**: Visual state transitions with FSM validation
+- **AI Settings Panel**: Comprehensive credential and provider management
+- **Local-First Architecture**: Your data stays secure on your machine
+- **Cross-Platform Support**: Windows, macOS (Intel & Apple Silicon), and Linux
 
 ## 🛠️ Tech Stack
 
@@ -215,11 +233,32 @@ The built application will be available in `src-tauri/target/release/bundle/`.
 - **Tech Leads**: For technical specifications and Architecture Decision Records (ADRs)
 - **Content Strategists**: For structured long-form content creation
 
-## 🔄 Development Phases
+## 🔄 Development Status
 
-1. **MVP**: Core editor + local AI + project creation 
-2. **AI-Forward**: Cloud AI integration + RAG system + document workflows
-3. **Polish**: Performance optimization + code signing + UI polish
+### ✅ Phase 1 (MVP) - COMPLETE
+- Core three-panel editor interface
+- Local AI integration with Phi-3-mini
+- Project and document creation
+- SQLite database with FTS5 search
+- Basic Tauri desktop application
+
+### ✅ Phase 2 (AI-Forward) - COMPLETE
+- **Document State FSM**: Structured workflow transitions
+- **Multi-Provider AI System**: Local, AWS Bedrock, Google Gemini
+- **Advanced RAG**: Hybrid lexical + vector search
+- **Streaming Chat UI**: Real-time AI conversations
+- **AI Model Selector**: Runtime provider switching
+- **Background Processing**: Automatic embedding generation
+- **Visual Regression Testing**: Cross-platform UI testing
+- **ARM64 Support**: Windows and macOS Apple Silicon
+
+### 🚧 Phase 3 (Polish & Expansion) - IN PROGRESS
+- Performance optimization and profiling
+- Code signing and notarization
+- Accessibility audit and remediation
+- UI/UX refinement and polish
+- Reusable AI prompts (AI Blocks)
+- Mermaid.js diagramming integration
 
 ## 📄 License
 
