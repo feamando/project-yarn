@@ -16,7 +16,7 @@ export interface Document {
   path: string
   name: string
   content: string
-  state: 'draft' | 'review' | 'published'
+  state: 'draft' | 'memo' | 'prfaq' | 'prd' | 'epic_breakdown' | 'archived'
   createdAt: Date
   updatedAt: Date
 }

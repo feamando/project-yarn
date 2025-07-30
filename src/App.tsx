@@ -1,7 +1,7 @@
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText, MessageSquare, Folder, Settings, Plus } from "lucide-react";
+import { MessageSquare, Settings, Plus, Blocks } from "lucide-react";
 import { MarkdownEditor } from "@/components/editor/MarkdownEditor";
 import { ProjectCreationModal } from "@/components/ProjectCreationModal";
 import { AISettings } from "@/components/AISettings";
@@ -9,6 +9,9 @@ import { AIModelSelector } from "@/components/AIModelSelector";
 import { StreamingChatUI } from "@/components/StreamingChatUI";
 import { DocumentTransformationUI } from "@/components/DocumentTransformationUI";
 import { CommandPalette } from "@/components/CommandPalette";
+import { VirtualizedFileList } from "@/components/explorer/VirtualizedFileList";
+import { AiBlocksManager } from "@/components/ai-blocks/AiBlocksManager";
+import { SkipLinks, useSkipLinkTarget } from "@/components/ui/skip-links";
 import { UpdaterDialog } from "./components/UpdaterDialog";
 import { UpdaterService, UpdateStatus } from "./services/updaterService";
 import { useAppStore } from "@/stores/useAppStore";
@@ -18,7 +21,7 @@ function App() {
   const { addProject, addDocument, setCurrentProject, setCurrentDocument, projects } = useAppStore();
   const currentDocument = useAppStore(state => state.documents.find(doc => doc.id === state.currentDocumentId));
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
-  const [currentView, setCurrentView] = useState<'editor' | 'settings'>('editor');
+  const [currentView, setCurrentView] = useState<'editor' | 'settings' | 'ai-blocks'>('editor');
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [isTransformationUIOpen, setIsTransformationUIOpen] = useState(false);
   const [selectedDocumentForTransformation, setSelectedDocumentForTransformation] = useState<any>(null);
@@ -120,10 +123,19 @@ function App() {
     }
   }, [projects.length, addProject, addDocument, setCurrentProject, setCurrentDocument]);
   
+  // Skip link target props
+  const mainContentProps = useSkipLinkTarget('main-content');
+  const fileExplorerProps = useSkipLinkTarget('file-explorer');
+  const editorProps = useSkipLinkTarget('editor');
+  const aiChatProps = useSkipLinkTarget('ai-chat');
+
   return (
     <div className="h-screen flex flex-col bg-background text-foreground">
+      {/* Skip Links for Keyboard Navigation */}
+      <SkipLinks />
+      
       {/* Header/Menu Bar */}
-      <header className="flex items-center justify-between p-4 border-b border-border">
+      <header className="flex items-center justify-between p-4 border-b border-border" role="banner">
         <div className="flex items-center space-x-4">
           <h1 className="text-xl font-semibold text-primary">Project Yarn</h1>
           <div className="text-sm text-muted-foreground">IDE for Documents</div>
@@ -141,7 +153,15 @@ function App() {
           <Button 
             variant="ghost" 
             size="sm"
-            onClick={() => setCurrentView(currentView === 'settings' ? 'editor' : 'settings')}
+            onClick={() => setCurrentView('ai-blocks')}
+            className={currentView === 'ai-blocks' ? 'bg-muted' : ''}
+          >
+            <Blocks className="h-4 w-4" />
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => setCurrentView('settings')}
             className={currentView === 'settings' ? 'bg-muted' : ''}
           >
             <Settings className="h-4 w-4" />
@@ -150,61 +170,34 @@ function App() {
       </header>
 
       {/* Main Content Area */}
-      <div className="flex-1 overflow-hidden">
+      <main className="flex-1 overflow-hidden" {...mainContentProps} role="main">
         {currentView === 'settings' ? (
           <AISettings />
+        ) : currentView === 'ai-blocks' ? (
+          <AiBlocksManager />
         ) : (
           <PanelGroup direction="horizontal">
             {/* Left Panel - File Tree */}
             <Panel defaultSize={20} minSize={15} maxSize={35}>
-              <div className="h-full bg-muted/20 border-r border-border">
-                <div className="p-4 border-b border-border">
-                  <div className="flex items-center space-x-2">
-                    <Folder className="h-4 w-4 text-primary" />
-                    <span className="font-medium text-sm">Explorer</span>
-                  </div>
-                </div>
-                <div className="p-4">
-                  <Card className="mb-4">
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-sm">Project Tree</CardTitle>
-                      <CardDescription className="text-xs">
-                        File explorer will be implemented here
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2 text-sm text-muted-foreground">
-                        <div className="flex items-center space-x-2">
-                          <FileText className="h-3 w-3" />
-                          <span>README.md</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <FileText className="h-3 w-3" />
-                          <span>document.md</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Folder className="h-3 w-3" />
-                          <span>drafts/</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
+              <nav className="h-full bg-muted/20 border-r border-border" {...fileExplorerProps} role="navigation" aria-label="File explorer">
+                <VirtualizedFileList className="h-full" />
+              </nav>
             </Panel>
 
             <PanelResizeHandle className="w-2 bg-border hover:bg-accent transition-colors" />
 
             {/* Central Panel - Editor */}
             <Panel defaultSize={60} minSize={40}>
-              <MarkdownEditor className="h-full" />
+              <section {...editorProps} aria-label="Markdown editor">
+                <MarkdownEditor className="h-full" />
+              </section>
             </Panel>
 
             <PanelResizeHandle className="w-2 bg-border hover:bg-accent transition-colors" />
 
             {/* Right Panel - AI Chat */}
             <Panel defaultSize={20} minSize={15} maxSize={35}>
-            <div className="h-full bg-muted/20 border-l border-border">
+            <aside className="h-full bg-muted/20 border-l border-border" {...aiChatProps} aria-label="AI assistant panel">
               <div className="p-4 border-b border-border">
                 <div className="flex items-center space-x-2">
                   <MessageSquare className="h-4 w-4 text-primary" />
@@ -230,11 +223,11 @@ function App() {
                   <StreamingChatUI />
                 </div>
               </div>
-            </div>
+            </aside>
             </Panel>
           </PanelGroup>
         )}
-      </div>
+      </main>
 
       {/* Status Bar */}
       <footer className="flex items-center justify-between p-2 text-xs text-muted-foreground border-t border-border bg-muted/30">

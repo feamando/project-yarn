@@ -1,0 +1,189 @@
+/* Accessibility Improvements for Project Yarn */
+/* Task 3.3.4: Accessibility Remediation - Critical Fix #4 */
+/* 
+ * Enhanced focus indicators, color contrast, and keyboard navigation styles
+ */
+
+/* Enhanced Focus Indicators */
+:focus-visible {
+  outline: 2px solid hsl(var(--primary)) !important;
+  outline-offset: 2px !important;
+  border-radius: 4px !important;
+}
+
+/* High contrast focus for interactive elements */
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[role="button"]:focus-visible,
+[role="tab"]:focus-visible,
+[role="menuitem"]:focus-visible {
+  outline: 3px solid hsl(var(--primary)) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 1px hsl(var(--background)), 0 0 0 4px hsl(var(--primary)) !important;
+}
+
+/* Focus indicators for custom components */
+.focus-visible\:ring-2:focus-visible {
+  --tw-ring-color: hsl(var(--primary)) !important;
+  --tw-ring-offset-width: 2px !important;
+}
+
+/* Enhanced focus for skip links */
+.skip-link:focus {
+  background-color: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+  text-decoration: none !important;
+  z-index: 9999 !important;
+  position: fixed !important;
+  top: 8px !important;
+  left: 8px !important;
+  padding: 8px 16px !important;
+  border-radius: 4px !important;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  :root {
+    --primary: 0 0% 0%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 20%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 90%;
+    --muted-foreground: 0 0% 10%;
+    --border: 0 0% 30%;
+  }
+  
+  button, input, textarea, select {
+    border: 2px solid hsl(var(--border)) !important;
+  }
+  
+  .text-muted-foreground {
+    color: hsl(var(--foreground)) !important;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Enhanced Color Contrast for Text */
+.text-muted-foreground {
+  color: hsl(var(--muted-foreground)) !important;
+  /* Ensure minimum 4.5:1 contrast ratio */
+}
+
+/* Improved button contrast */
+.btn-ghost:hover {
+  background-color: hsl(var(--accent)) !important;
+  color: hsl(var(--accent-foreground)) !important;
+}
+
+/* Enhanced error state visibility */
+.border-destructive {
+  border-color: hsl(var(--destructive)) !important;
+  border-width: 2px !important;
+}
+
+.text-destructive {
+  color: hsl(var(--destructive)) !important;
+  font-weight: 600 !important;
+}
+
+/* Loading state announcements */
+.loading-announcement {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.loading-announcement:focus,
+.loading-announcement.announce {
+  position: static;
+  width: auto;
+  height: auto;
+  overflow: visible;
+}
+
+/* Keyboard navigation helpers */
+.keyboard-nav-visible {
+  outline: 2px solid hsl(var(--primary)) !important;
+  outline-offset: 2px !important;
+}
+
+/* Screen reader only content */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.sr-only:focus,
+.sr-only:active {
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  padding: inherit !important;
+  margin: inherit !important;
+  overflow: visible !important;
+  clip: auto !important;
+  white-space: normal !important;
+}
+
+/* Focus within for containers */
+.focus-within\:ring-2:focus-within {
+  --tw-ring-color: hsl(var(--primary)) !important;
+  --tw-ring-offset-width: 1px !important;
+}
+
+/* Enhanced button states */
+button[aria-pressed="true"] {
+  background-color: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+  font-weight: 600 !important;
+}
+
+/* Improved form field associations */
+input[aria-invalid="true"],
+textarea[aria-invalid="true"] {
+  border-color: hsl(var(--destructive)) !important;
+  border-width: 2px !important;
+}
+
+/* Enhanced live region visibility for testing */
+[aria-live]:not(.sr-only) {
+  /* Ensure live regions are properly positioned */
+  position: relative;
+}
+
+/* Improved heading hierarchy visual cues */
+h1 { font-size: 2rem; font-weight: 700; }
+h2 { font-size: 1.5rem; font-weight: 600; }
+h3 { font-size: 1.25rem; font-weight: 600; }
+h4 { font-size: 1.125rem; font-weight: 500; }
+h5 { font-size: 1rem; font-weight: 500; }
+h6 { font-size: 0.875rem; font-weight: 500; }
+
+/* Ensure proper heading contrast */
+h1, h2, h3, h4, h5, h6 {
+  color: hsl(var(--foreground)) !important;
+}

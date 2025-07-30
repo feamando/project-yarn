@@ -34,6 +34,22 @@ use commands::updater::{
     check_for_updates, install_update, get_app_version, restart_app
 };
 
+// Import database optimization commands
+use commands::database_optimization::{
+    optimize_database, analyze_rag_performance, get_database_performance_metrics,
+    apply_index_recommendations, validate_database_health, analyze_specific_query,
+    get_optimization_history
+};
+
+// Import AI Blocks commands
+use commands::ai_blocks::{
+    create_ai_block, update_ai_block, delete_ai_block, get_ai_block, get_ai_blocks,
+    search_ai_blocks, get_ai_blocks_by_category, get_favorite_ai_blocks,
+    get_most_used_ai_blocks, toggle_ai_block_favorite, process_ai_block_template,
+    get_ai_block_categories, get_ai_blocks_usage_stats, duplicate_ai_block,
+    export_ai_blocks, import_ai_blocks, validate_ai_block_template
+};
+
 // Import AI provider manager
 use application::ai_provider_manager::initialize_ai_provider_manager;
 
@@ -47,7 +63,16 @@ use commands::model_versioning::{
 
 // Import models module
 mod models;
+mod services;
 use application::services::{ProjectService, DocumentService, LocalAiService};
+use services::{DatabaseOptimizationService, AiBlocksService};
+
+// Import performance profiler
+mod performance_profiler;
+use performance_profiler::{
+    start_performance_profiling, benchmark_database_operations,
+    benchmark_file_operations, benchmark_ai_operations, get_system_performance_info
+};
 use infrastructure::{DatabaseManager, FilesystemManager, CredentialManager};
 use infrastructure::db_layer::DatabaseConnection;
 use std::sync::Arc;
@@ -102,7 +127,39 @@ fn main() {
             check_for_updates,
             install_update,
             get_app_version,
-            restart_app
+            restart_app,
+            // Performance profiling commands
+            start_performance_profiling,
+            benchmark_database_operations,
+            benchmark_file_operations,
+            benchmark_ai_operations,
+            get_system_performance_info,
+            // Database optimization commands
+            optimize_database,
+            analyze_rag_performance,
+            get_database_performance_metrics,
+            apply_index_recommendations,
+            validate_database_health,
+            analyze_specific_query,
+            get_optimization_history,
+            // AI Blocks commands
+            create_ai_block,
+            update_ai_block,
+            delete_ai_block,
+            get_ai_block,
+            get_ai_blocks,
+            search_ai_blocks,
+            get_ai_blocks_by_category,
+            get_favorite_ai_blocks,
+            get_most_used_ai_blocks,
+            toggle_ai_block_favorite,
+            process_ai_block_template,
+            get_ai_block_categories,
+            get_ai_blocks_usage_stats,
+            duplicate_ai_block,
+            export_ai_blocks,
+            import_ai_blocks,
+            validate_ai_block_template
         ])
         .setup(|app| {
             // Initialize infrastructure managers
@@ -126,6 +183,13 @@ fn main() {
             let project_service = ProjectService::new(db_manager.clone(), fs_manager.clone());
             let document_service = DocumentService::new();
             let ai_service = LocalAiService::new();
+            
+            // Initialize database optimization service
+            let db_connection_arc = Arc::new(db_connection);
+            let optimization_service = Arc::new(DatabaseOptimizationService::new(db_connection_arc.clone()));
+            
+            // Initialize AI Blocks service
+            let ai_blocks_service = Arc::new(AiBlocksService::new(db_connection_arc.clone()));
             
             // Initialize and register model manager
             if let Err(e) = initialize_model_manager(app) {
@@ -158,7 +222,9 @@ fn main() {
             app.manage(fs_manager);
             app.manage(credential_manager);
             app.manage(versioning_config);
-            app.manage(db_connection);
+            app.manage(db_connection_arc.clone());
+            app.manage(optimization_service);
+            app.manage(ai_blocks_service);
             
             Ok(())
         })

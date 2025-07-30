@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { LiveRegion, useLiveRegion } from "@/components/ui/live-region";
 import { 
   Send, 
   User, 
@@ -60,6 +61,7 @@ export const StreamingChatUI: React.FC = () => {
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const unlistenRef = useRef<UnlistenFn | null>(null);
+  const { announcement, announce } = useLiveRegion();
 
   // Auto-scroll to bottom when new messages arrive
   const scrollToBottom = useCallback(() => {
@@ -90,6 +92,7 @@ export const StreamingChatUI: React.FC = () => {
             if (chunk.is_final) {
               setCurrentStreamingId(null);
               setIsLoading(false);
+              announce('AI response completed', 'polite');
             }
           }
         });
@@ -381,6 +384,11 @@ export const StreamingChatUI: React.FC = () => {
           Press Enter to send, Shift+Enter for new line
         </div>
       </div>
+      
+      {/* Live Region for Screen Reader Announcements */}
+      <LiveRegion politeness="polite">
+        {announcement}
+      </LiveRegion>
     </div>
   );
 };

@@ -2,8 +2,10 @@ import React, { useState, useCallback, useEffect, useRef } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { useAppStore, useCurrentDocument } from '@/stores/useAppStore'
-import { FileText, Save, Eye, Edit3, Sparkles, Loader2 } from 'lucide-react'
+import { FileText, Save, Eye, Edit3, Sparkles, Loader2, SplitSquareHorizontal } from 'lucide-react'
 import { invoke } from '@tauri-apps/api/tauri'
+import { MarkdownPreview } from './MarkdownPreview'
+import { parseMermaidBlocks } from '../../utils/markdownParser'
 
 interface MarkdownEditorProps {
   className?: string
@@ -25,6 +27,10 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ className }) => 
   const [isLoadingSuggestion, setIsLoadingSuggestion] = useState(false)
   const [showSuggestion, setShowSuggestion] = useState(false)
   const [cursorPosition, setCursorPosition] = useState(0)
+  
+  // Preview mode state
+  const [viewMode, setViewMode] = useState<'edit' | 'preview' | 'split'>('edit')
+  const [mermaidBlocks, setMermaidBlocks] = useState<any[]>([])
   
   // Refs for debouncing and text area
   const autocompleteTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -72,19 +78,17 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ className }) => 
     }
   }, [])
   
-  // Sync content when document changes
+  // Sync content with current document
   useEffect(() => {
     if (currentDocument) {
-      setContent(currentDocument.content)
+      setContent(currentDocument.content || '')
       setHasUnsavedChanges(false)
-    } else {
-      setContent('')
-      setHasUnsavedChanges(false)
+      setLastSaved(currentDocument.updatedAt ? new Date(currentDocument.updatedAt) : null)
+      
+      // Detect Mermaid blocks in the content
+      const blocks = parseMermaidBlocks(currentDocument.content || '')
+      setMermaidBlocks(blocks)
     }
-    
-    // Clear AI suggestions when document changes
-    setAiSuggestion('')
-    setShowSuggestion(false)
   }, [currentDocument])
   
   // Cleanup autocomplete timeout on unmount
@@ -287,40 +291,77 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ className }) => 
             {isSaving ? 'Saving...' : 'Save'}
           </Button>
           
-          <Button variant="outline" size="sm">
-            <Eye className="h-3 w-3 mr-1" />
-            Preview
-          </Button>
+          {/* View Mode Toggle */}
+          <div className="flex items-center border border-border rounded-md" role="group" aria-label="Editor view mode">
+            <Button 
+              variant={viewMode === 'edit' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('edit')}
+              className="rounded-r-none border-r border-border h-8 px-3"
+              aria-pressed={viewMode === 'edit'}
+              aria-label="Edit mode - Write and edit markdown content"
+            >
+              <Edit3 className="h-3 w-3 mr-1" aria-hidden="true" />
+              Edit
+            </Button>
+            <Button 
+              variant={viewMode === 'preview' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('preview')}
+              className="rounded-none border-r border-border h-8 px-3"
+              aria-pressed={viewMode === 'preview'}
+              aria-label="Preview mode - View rendered markdown with diagrams"
+            >
+              <Eye className="h-3 w-3 mr-1" aria-hidden="true" />
+              Preview
+            </Button>
+            <Button 
+              variant={viewMode === 'split' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('split')}
+              className="rounded-l-none h-8 px-3"
+              aria-pressed={viewMode === 'split'}
+              aria-label="Split mode - Edit and preview side by side"
+            >
+              <SplitSquareHorizontal className="h-3 w-3 mr-1" aria-hidden="true" />
+              Split
+            </Button>
+          </div>
         </div>
       </div>
 
       {/* Main Editor Area */}
       <div className="flex-1 flex relative">
-        <div className="flex-1 p-0 relative">
-          <textarea
-            ref={textareaRef}
-            value={content}
-            onChange={(e) => {
-              const target = e.target as HTMLTextAreaElement
-              handleContentChange(e.target.value, target.selectionStart)
-            }}
-            onSelect={handleCursorChange}
-            onKeyUp={handleCursorChange}
-            onClick={handleCursorChange}
-            placeholder="Start writing your document..."
-            className={`
-              w-full h-full resize-none border-0 outline-none bg-background text-foreground
-              p-6 font-mono leading-relaxed
-              ${settings.fontSize === 'sm' ? 'text-sm' : settings.fontSize === 'lg' ? 'text-lg' : 'text-base'}
-              ${settings.wordWrap ? 'whitespace-pre-wrap' : 'whitespace-pre'}
-              placeholder:text-muted-foreground
-              focus:ring-0 focus:outline-none
-            `}
-            spellCheck="true"
-            autoCapitalize="sentences"
-            autoComplete="off"
-            autoCorrect="on"
-          />
+        {/* Edit Mode or Split Mode - Editor */}
+        {(viewMode === 'edit' || viewMode === 'split') && (
+          <div className={`${viewMode === 'split' ? 'flex-1 border-r border-border' : 'flex-1'} p-0 relative`}>
+            <textarea
+              ref={textareaRef}
+              value={content}
+              onChange={(e) => {
+                const target = e.target as HTMLTextAreaElement
+                handleContentChange(e.target.value, target.selectionStart)
+                // Update Mermaid blocks when content changes
+                const blocks = parseMermaidBlocks(e.target.value)
+                setMermaidBlocks(blocks)
+              }}
+              onSelect={handleCursorChange}
+              onKeyUp={handleCursorChange}
+              onClick={handleCursorChange}
+              placeholder="Start writing your document..."
+              className={`
+                w-full h-full resize-none border-0 outline-none bg-background text-foreground
+                p-6 font-mono leading-relaxed
+                ${settings.fontSize === 'sm' ? 'text-sm' : settings.fontSize === 'lg' ? 'text-lg' : 'text-base'}
+                ${settings.wordWrap ? 'whitespace-pre-wrap' : 'whitespace-pre'}
+                placeholder:text-muted-foreground
+                focus:ring-0 focus:outline-none
+              `}
+              spellCheck="true"
+              autoCapitalize="sentences"
+              autoComplete="off"
+              autoCorrect="on"
+            />
           
           {/* AI Suggestion Overlay */}
           {showSuggestion && aiSuggestion && (
@@ -365,7 +406,18 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ className }) => 
               </div>
             </div>
           )}
-        </div>
+          </div>
+        )}
+        
+        {/* Preview Mode or Split Mode - Preview */}
+        {(viewMode === 'preview' || viewMode === 'split') && (
+          <div className={`${viewMode === 'split' ? 'flex-1' : 'flex-1'} bg-background`}>
+            <MarkdownPreview 
+              content={content}
+              className="h-full overflow-auto p-6"
+            />
+          </div>
+        )}
       </div>
 
       {/* Editor Footer/Stats */}
@@ -374,6 +426,12 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ className }) => 
           <span>Line 1, Column {cursorPosition + 1}</span>
           <span>UTF-8</span>
           <span>Markdown</span>
+          {mermaidBlocks.length > 0 && (
+            <span className="flex items-center space-x-1 text-green-600">
+              <div className="w-2 h-2 rounded-full bg-green-500" />
+              <span>{mermaidBlocks.length} diagram{mermaidBlocks.length !== 1 ? 's' : ''}</span>
+            </span>
+          )}
           {isLoadingSuggestion && (
             <span className="flex items-center space-x-1 text-blue-600">
               <Loader2 className="w-3 h-3 animate-spin" />
