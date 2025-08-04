@@ -197,7 +197,7 @@ export const VariableInputModal: React.FC<VariableInputModalProps> = ({
                 <div key={index} className="space-y-2">
                   <Label htmlFor={variable.name} className="flex items-center">
                     {variable.name}
-                    {variable.required && <span className="text-red-500 ml-1">*</span>}
+                    {variable.required && <span className="text-v0-red ml-1">*</span>}
                     {variable.description && (
                       <span className="text-sm text-muted-foreground ml-2">
                         - {variable.description}
@@ -249,7 +249,7 @@ export const VariableInputModal: React.FC<VariableInputModalProps> = ({
                 <CardTitle className="text-base">Preview</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="bg-muted/30 p-3 rounded text-sm font-mono whitespace-pre-wrap max-h-40 overflow-y-auto">
+                <div className="bg-v0-border-primary/30 p-3 rounded text-sm font-mono whitespace-pre-wrap max-h-40 overflow-y-auto">
                   {processedPrompt}
                 </div>
               </CardContent>

@@ -1,9 +1,11 @@
-// Accessibility Test Utilities
-// Task 3.3.3: Accessibility Audit Implementation
+// Comprehensive Accessibility Test Utilities
+// Task 6.1: Add automated accessibility testing to test suite
 
-import { render, RenderResult } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import React from 'react'
+import { render, RenderResult, screen, waitFor } from '@testing-library/react'
+import { axe, toHaveNoViolations, JestAxeConfigureOptions } from 'jest-axe'
 import userEvent from '@testing-library/user-event'
+import { accessibilityTestConfig, testScenarios, performanceThresholds } from './accessibility.config'
 
 // Extend Jest matchers
 expect.extend(toHaveNoViolations)

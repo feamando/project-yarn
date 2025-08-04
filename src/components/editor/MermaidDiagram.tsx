@@ -264,9 +264,9 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({
   };
 
   return (
-    <div className={`mermaid-diagram-container border rounded-lg bg-background ${className}`}>
+    <div className={`mermaid-diagram-container border rounded-lg bg-v0-dark-bg ${className}`}>
       {/* Diagram Header */}
-      <div className="flex items-center justify-between p-3 border-b bg-muted/30">
+      <div className="flex items-center justify-between p-3 border-b bg-v0-bg-secondary/30">
         <div className="flex items-center space-x-2">
           <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
           <span className="text-sm font-medium text-muted-foreground">Mermaid Diagram</span>
@@ -344,10 +344,10 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({
 
       {/* Diagram Code (collapsible) */}
       <details className="border-t">
-        <summary className="p-3 cursor-pointer text-sm text-muted-foreground hover:bg-muted/50">
+        <summary className="p-3 cursor-pointer text-sm text-muted-foreground hover:bg-v0-bg-secondary/50">
           View Source Code
         </summary>
-        <div className="p-3 bg-muted/20">
+        <div className="p-3 bg-v0-bg-secondary/20">
           <pre className="text-xs font-mono whitespace-pre-wrap break-words">
             <code>{code}</code>
           </pre>

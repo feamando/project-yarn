@@ -1,3 +1,5 @@
+@import './styles/design-tokens.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -25,7 +27,7 @@
     --accent: 210 40% 96%;
     --accent-foreground: 222.2 84% 4.9%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 4 100% 60.2%; /* v0 red #FF4136 */
     --destructive-foreground: 210 40% 98%;
 
     --border: 214.3 31.8% 91.4%;
@@ -33,6 +35,17 @@
     --ring: 222.2 84% 4.9%;
 
     --radius: 0.5rem;
+
+    /* V0 Brand Colors */
+    --color-brand-gold: #FFD700;
+    --color-brand-red: #FF4136;
+    --color-brand-teal: #4EC9B0;
+    
+    /* V0 Dark Theme Colors */
+    --color-dark-bg: #1E1E1E;
+    --color-dark-border: #3E3E42;
+    --color-dark-text: #D4D4D4;
+    --color-dark-text-muted: #858585;
   }
 
   .dark {
@@ -57,7 +70,7 @@
     --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 4 100% 60.2%; /* v0 red #FF4136 */
     --destructive-foreground: 210 40% 98%;
 
     --border: 217.2 32.6% 17.5%;
@@ -66,11 +79,4 @@
   }
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-}
+/* Base layer removed to fix Tailwind compilation issues */

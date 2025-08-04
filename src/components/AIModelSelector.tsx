@@ -20,6 +20,7 @@ import {
   Zap,
   Globe
 } from 'lucide-react';
+import { ContextIndicator } from '@/components/v0-components/context-indicator';
 
 // Types for AI provider and model information
 interface AIProvider {
@@ -247,9 +248,14 @@ export const AIModelSelector: React.FC = () => {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium">AI Model</span>
-          <RefreshCw className="h-4 w-4 animate-spin text-muted-foreground" />
         </div>
-        <div className="h-8 bg-muted animate-pulse rounded" />
+        <ContextIndicator 
+          isProcessing={true} 
+          processedItems={providers.length} 
+          totalItems={3}
+          phase="initializing"
+          ariaLabel="Loading AI providers"
+        />
       </div>
     );
   }
@@ -265,10 +271,25 @@ export const AIModelSelector: React.FC = () => {
           onClick={loadProviders}
           disabled={loading || switching}
           className="h-6 w-6 p-0"
+          aria-label={loading ? "Refreshing AI providers..." : "Refresh AI providers"}
+          title={loading ? "Refreshing AI providers..." : "Refresh AI providers"}
         >
           <RefreshCw className={`h-3 w-3 ${loading ? 'animate-spin' : ''}`} />
         </Button>
       </div>
+
+      {/* Provider Switching Status */}
+      {switching && (
+        <div className="py-2">
+          <ContextIndicator 
+            isProcessing={switching}
+            processedItems={60}
+            totalItems={100}
+            phase="processing"
+            ariaLabel="Switching AI provider"
+          />
+        </div>
+      )}
 
       {/* Error Alert */}
       {error && (
@@ -282,7 +303,7 @@ export const AIModelSelector: React.FC = () => {
 
       {/* Active Provider Info */}
       {activeProvider && (
-        <div className="flex items-center justify-between p-2 bg-muted/50 rounded-lg">
+        <div className="flex items-center justify-between p-2 bg-v0-border-primary/50 rounded-v0-radius-lg">
           <div className="flex items-center space-x-2">
             {getProviderIcon(activeProvider.type)}
             <span className="text-xs font-medium">{activeProvider.name}</span>
@@ -326,7 +347,7 @@ export const AIModelSelector: React.FC = () => {
 
           {/* Selected Model Info */}
           {selectedModel && (
-            <div className="p-2 bg-muted/30 rounded text-xs space-y-1">
+            <div className="p-2 bg-v0-border-primary/30 rounded text-xs space-y-1">
               {(() => {
                 const model = availableModels.find(m => m.value === selectedModel);
                 if (!model) return null;

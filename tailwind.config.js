@@ -17,6 +17,18 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        'sans': ['system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'Noto Sans', 'sans-serif'],
+        'serif': ['ui-serif', 'Georgia', 'Cambria', 'Times New Roman', 'Times', 'serif'],
+      },
+      fontSize: {
+        'xs': ['0.75rem', { lineHeight: '1rem' }],
+        'sm': ['0.875rem', { lineHeight: '1.25rem' }],
+        'base': ['1rem', { lineHeight: '1.5rem' }],
+        'lg': ['1.125rem', { lineHeight: '1.75rem' }],
+        'xl': ['1.25rem', { lineHeight: '1.75rem' }],
+        '2xl': ['1.5rem', { lineHeight: '2rem' }],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -51,6 +63,15 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // V0 Design System Colors
+        'v0-gold': '#FFD700',
+        'v0-red': '#FF4136',
+        'v0-teal': '#4EC9B0',
+        // V0 Dark Theme Colors
+        'v0-dark-bg': '#1E1E1E',
+        'v0-border-primary': '#3E3E42',
+        'v0-text-primary': '#D4D4D4',
+        'v0-text-muted': '#858585',
       },
       borderRadius: {
         lg: "var(--radius)",

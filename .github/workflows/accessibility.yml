@@ -1,0 +1,254 @@
+name: Accessibility Checks
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run accessibility audit daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+jobs:
+  accessibility-tests:
+    name: Automated Accessibility Testing
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Run accessibility tests
+      run: |
+        npm run test:accessibility
+        npm run test:accessibility:coverage
+      env:
+        CI: true
+        
+    - name: Upload accessibility test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: accessibility-test-results-${{ matrix.node-version }}
+        path: |
+          coverage/accessibility/
+          test-results/accessibility/
+        retention-days: 30
+
+  accessibility-audit:
+    name: Accessibility Audit
+    runs-on: ubuntu-latest
+    needs: accessibility-tests
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Build application
+      run: npm run build
+      
+    - name: Start application server
+      run: |
+        npm run preview &
+        sleep 10
+      
+    - name: Run Lighthouse accessibility audit
+      uses: treosh/lighthouse-ci-action@v10
+      with:
+        configPath: './.lighthouserc.json'
+        uploadArtifacts: true
+        temporaryPublicStorage: true
+        
+    - name: Run axe-core accessibility scan
+      run: |
+        npx @axe-core/cli http://localhost:4173 \
+          --tags wcag2a,wcag2aa,wcag21aa \
+          --reporter json \
+          --output-file axe-results.json
+          
+    - name: Upload audit results
+      uses: actions/upload-artifact@v4
+      with:
+        name: accessibility-audit-results
+        path: |
+          axe-results.json
+          .lighthouseci/
+        retention-days: 30
+
+  accessibility-regression:
+    name: Accessibility Regression Testing
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Run accessibility regression tests
+      run: |
+        # Compare accessibility test results with base branch
+        npm run test:accessibility:regression
+        
+    - name: Comment PR with accessibility results
+      uses: actions/github-script@v7
+      if: always()
+      with:
+        script: |
+          const fs = require('fs');
+          
+          try {
+            const results = JSON.parse(fs.readFileSync('accessibility-regression-results.json', 'utf8'));
+            
+            const comment = `
+            ## 🔍 Accessibility Regression Test Results
+            
+            **Status**: ${results.passed ? '✅ PASSED' : '❌ FAILED'}
+            
+            **Summary**:
+            - New violations: ${results.newViolations || 0}
+            - Fixed violations: ${results.fixedViolations || 0}
+            - Total violations: ${results.totalViolations || 0}
+            
+            ${results.newViolations > 0 ? '⚠️ **New accessibility violations detected!**' : ''}
+            ${results.fixedViolations > 0 ? '🎉 **Accessibility violations fixed!**' : ''}
+            
+            <details>
+            <summary>View detailed results</summary>
+            
+            \`\`\`json
+            ${JSON.stringify(results, null, 2)}
+            \`\`\`
+            </details>
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+          } catch (error) {
+            console.log('No accessibility regression results found');
+          }
+
+  accessibility-compliance:
+    name: WCAG Compliance Check
+    runs-on: ubuntu-latest
+    needs: [accessibility-tests, accessibility-audit]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Download test artifacts
+      uses: actions/download-artifact@v4
+      with:
+        pattern: accessibility-*
+        merge-multiple: true
+        
+    - name: Validate WCAG 2.1 AA compliance
+      run: |
+        node scripts/validate-accessibility-compliance.js
+        
+    - name: Generate accessibility report
+      run: |
+        node scripts/generate-accessibility-report.js
+        
+    - name: Upload compliance report
+      uses: actions/upload-artifact@v4
+      with:
+        name: wcag-compliance-report
+        path: |
+          accessibility-compliance-report.html
+          accessibility-compliance-report.json
+        retention-days: 90
+
+  accessibility-performance:
+    name: Accessibility Performance Check
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Run accessibility performance tests
+      run: |
+        npm run test:accessibility:performance
+        
+    - name: Check performance thresholds
+      run: |
+        node scripts/check-accessibility-performance.js
+        
+    - name: Upload performance results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: accessibility-performance-results
+        path: accessibility-performance-results.json
+        retention-days: 30
+
+  # Fail the workflow if accessibility violations are found
+  accessibility-gate:
+    name: Accessibility Quality Gate
+    runs-on: ubuntu-latest
+    needs: [accessibility-tests, accessibility-audit, accessibility-compliance]
+    if: always()
+    
+    steps:
+    - name: Check accessibility results
+      run: |
+        echo "Checking accessibility quality gate..."
+        
+        # This step will fail if any accessibility violations are found
+        # preventing the deployment of inaccessible code
+        if [ "${{ needs.accessibility-tests.result }}" != "success" ] || 
+           [ "${{ needs.accessibility-audit.result }}" != "success" ] || 
+           [ "${{ needs.accessibility-compliance.result }}" != "success" ]; then
+          echo "❌ Accessibility quality gate failed!"
+          echo "Please fix accessibility violations before merging."
+          exit 1
+        else
+          echo "✅ Accessibility quality gate passed!"
+        fi

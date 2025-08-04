@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { useAppStore, useCurrentProject, useProjectDocuments } from '@/stores/useAppStore';
+
 import { 
   FileText, 
   Folder, 
@@ -14,9 +14,10 @@ import {
   Filter,
   SortAsc,
   SortDesc,
-
 } from 'lucide-react';
-import { Document } from '@/stores/useAppStore';
+import { YarnLogo } from '@/components/v0-components/yarn-logo';
+import { V0SidebarItem } from '@/components/v0-components/composition-patterns';
+import { useAppStore, useCurrentProject, useProjectDocuments, Document } from '@/stores/useAppStore';
 
 /**
  * Virtualized File List Component
@@ -53,13 +54,13 @@ const FileItem: React.FC<FileItemProps> = ({ index, style, data }) => {
 
   const getStateColor = (state: string) => {
     switch (state) {
-      case 'draft': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
-      case 'memo': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
-      case 'prfaq': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
-      case 'prd': return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200';
-      case 'epic_breakdown': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-      case 'archived': return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
-      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+      case 'draft': return 'bg-v0-text-muted text-v0-text-primary';
+      case 'memo': return 'bg-v0-teal/20 text-v0-teal';
+      case 'prfaq': return 'bg-v0-red/20 text-v0-red';
+      case 'prd': return 'bg-v0-gold/20 text-v0-gold';
+      case 'epic_breakdown': return 'bg-v0-teal/30 text-v0-teal';
+      case 'archived': return 'bg-v0-border-subtle text-v0-text-secondary';
+      default: return 'bg-v0-border-subtle text-v0-text-secondary';
     }
   };
 
@@ -72,44 +73,40 @@ const FileItem: React.FC<FileItemProps> = ({ index, style, data }) => {
     }).format(new Date(date));
   };
 
+  // Create badge component for document state
+  const stateBadge = (
+    <Badge variant="secondary" className={`text-xs px-v0-2 py-v0-1 rounded-v0-sm ${getStateColor(document.state)}`}>
+      {document.state}
+    </Badge>
+  );
+
   return (
-    <div
-      style={style}
-      className={`px-3 py-2 border-b border-border/50 hover:bg-muted/50 cursor-pointer transition-colors ${
-        isSelected ? 'bg-primary/10 border-primary/20' : ''
-      }`}
-      onClick={() => onDocumentSelect(document)}
-    >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2 flex-1 min-w-0">
-          <FileText className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-          <div className="flex-1 min-w-0">
-            <div className="text-sm font-medium truncate" title={document.name}>
-              {document.name}
-            </div>
-            <div className="text-xs text-muted-foreground truncate" title={document.path}>
-              {document.path}
-            </div>
+    <div style={style} className="px-v0-3">
+      <div className="relative group">
+        <V0SidebarItem
+          icon={<FileText className="h-4 w-4" />}
+          label={document.name}
+          isActive={isSelected}
+          badge={stateBadge}
+          onClick={() => onDocumentSelect(document)}
+          className="w-full justify-start mb-v0-1 hover:bg-v0-bg-secondary pr-v0-8"
+        />
+        {/* Action button positioned absolutely to avoid button nesting */}
+        <div 
+          className="absolute right-v0-2 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDocumentAction(document, 'menu');
+          }}
+        >
+          <div className="h-6 w-6 flex items-center justify-center text-v0-text-secondary hover:text-v0-text-primary hover:bg-v0-bg-tertiary rounded-v0-sm cursor-pointer">
+            <MoreHorizontal className="h-3 w-3" />
           </div>
         </div>
-        <div className="flex items-center space-x-2 flex-shrink-0">
-          <Badge variant="secondary" className={`text-xs ${getStateColor(document.state)}`}>
-            {document.state}
-          </Badge>
-          <div className="text-xs text-muted-foreground">
-            {formatDate(document.updatedAt)}
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-6 w-6 p-0"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDocumentAction(document, 'menu');
-            }}
-          >
-            <MoreHorizontal className="h-3 w-3" />
-          </Button>
+      </div>
+      <div className="px-v0-6 pb-v0-2">
+        <div className="text-xs text-v0-text-secondary truncate" title={document.path}>
+          {document.path} • {formatDate(document.updatedAt)}
         </div>
       </div>
     </div>
@@ -263,7 +260,10 @@ export const VirtualizedFileList: React.FC<VirtualizedFileListProps> = ({ classN
       <div className={`h-full ${className}`}>
         <Card>
           <CardContent className="p-6 text-center">
-            <Folder className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <YarnLogo className="w-8 h-8" />
+              <Folder className="h-8 w-8 text-muted-foreground" />
+            </div>
             <p className="text-muted-foreground">No project selected</p>
             <p className="text-sm text-muted-foreground mt-2">
               Create or select a project to view files
@@ -275,9 +275,9 @@ export const VirtualizedFileList: React.FC<VirtualizedFileListProps> = ({ classN
   }
 
   return (
-    <div className={`h-full flex flex-col ${className}`} ref={containerRef}>
+    <div className={`h-full flex flex-col bg-v0-dark-bg ${className}`} ref={containerRef}>
       {/* Header */}
-      <div className="p-4 border-b border-border">
+      <div className="p-4 border-b border-v0-border-primary">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center space-x-2">
             <Folder className="h-4 w-4 text-primary" />
@@ -293,7 +293,7 @@ export const VirtualizedFileList: React.FC<VirtualizedFileListProps> = ({ classN
               variant="ghost"
               size="sm"
               onClick={() => setShowFilters(!showFilters)}
-              className={`h-7 w-7 p-0 ${showFilters ? 'bg-muted' : ''}`}
+              className={`h-7 w-7 p-0 ${showFilters ? 'bg-v0-bg-secondary' : ''}`}
             >
               <Filter className="h-3 w-3" />
             </Button>
@@ -370,7 +370,7 @@ export const VirtualizedFileList: React.FC<VirtualizedFileListProps> = ({ classN
 
       {/* Performance Metrics */}
       {showPerformanceMetrics && (
-        <div className="px-4 py-2 bg-muted/30 border-b border-border">
+        <div className="px-4 py-2 bg-v0-bg-secondary/30 border-b border-v0-border-primary">
           <div className="text-xs text-muted-foreground">
             <span className="font-medium">Virtualized:</span> Rendering {Math.min(20, filteredAndSortedDocuments.length)} of {filteredAndSortedDocuments.length} items
             <span className="ml-2">({(virtualizationRatio * 100).toFixed(1)}% efficiency)</span>
@@ -382,7 +382,10 @@ export const VirtualizedFileList: React.FC<VirtualizedFileListProps> = ({ classN
       <div className="flex-1 overflow-hidden">
         {filteredAndSortedDocuments.length === 0 ? (
           <div className="p-6 text-center">
-            <FileText className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <YarnLogo className="w-8 h-8" />
+              <FileText className="h-8 w-8 text-muted-foreground" />
+            </div>
             <p className="text-muted-foreground">
               {searchQuery ? 'No files match your search' : 'No files in this project'}
             </p>
@@ -418,7 +421,7 @@ export const VirtualizedFileList: React.FC<VirtualizedFileListProps> = ({ classN
 
       {/* Footer Stats */}
       {projectDocuments && projectDocuments.length > 0 && (
-        <div className="px-4 py-2 border-t border-border bg-muted/20">
+        <div className="px-4 py-2 border-t border-v0-border-primary bg-v0-bg-secondary/20">
           <div className="text-xs text-muted-foreground">
             {filteredAndSortedDocuments.length} files
             {searchQuery && ` (filtered from ${projectDocuments.length})`}

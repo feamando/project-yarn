@@ -165,7 +165,7 @@ export const ModelVersioning: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Model Versioning</h2>
+          <h2 className="text-2xl font-serif font-bold">Model Versioning</h2>
           <p className="text-muted-foreground">
             Manage AI model versions, updates, and rollbacks
           </p>
@@ -225,8 +225,8 @@ export const ModelVersioning: React.FC = () => {
             <Card>
               <CardContent className="pt-6">
                 <div className="text-center py-8">
-                  <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold">All models are up to date</h3>
+                  <CheckCircle className="w-12 h-12 text-v0-teal mx-auto mb-4" />
+                  <h3 className="text-xl font-serif font-semibold">All models are up to date</h3>
                   <p className="text-muted-foreground">
                     No updates available for your installed models
                   </p>
@@ -292,7 +292,7 @@ export const ModelVersioning: React.FC = () => {
               <CardContent className="pt-6">
                 <div className="text-center py-8">
                   <AlertCircle className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold">No models installed</h3>
+                  <h3 className="text-xl font-serif font-semibold">No models installed</h3>
                   <p className="text-muted-foreground">
                     Install models to see them here
                   </p>
