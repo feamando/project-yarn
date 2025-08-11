@@ -162,7 +162,7 @@ export function ContextIndicator({
         </div>
         
         {/* Progress bar for visual feedback */}
-        <div className="w-full bg-gray-200 rounded-full h-1 mt-1 overflow-hidden">
+        <div className="w-full bg-v0-border-primary rounded-full h-1 mt-1 overflow-hidden">
           <div 
             className={`h-full transition-all duration-500 ease-out ${
               currentPhase === 'error' ? 'bg-v0-red' :

@@ -337,8 +337,8 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ className }) => 
               onClick={() => setViewMode('split')}
               className={`rounded-l-none h-8 px-3 ${
                 viewMode === 'split' 
-                  ? 'bg-[#4EC9B0] hover:bg-[#4EC9B0]/90 text-black' 
-                  : 'hover:bg-[#3E3E42]'
+                  ? 'bg-v0-teal hover:bg-v0-teal/90 text-black' 
+                  : 'hover:bg-v0-border-primary'
               }`}
               aria-pressed={viewMode === 'split'}
               aria-label="Split mode - Edit and preview side by side"
@@ -354,7 +354,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ className }) => 
       <div className="flex-1 flex relative">
         {/* Edit Mode or Split Mode - Editor */}
         {(viewMode === 'edit' || viewMode === 'split') && (
-          <div className={`${viewMode === 'split' ? 'flex-1 border-r border-[#3E3E42]' : 'flex-1'} p-0 relative`}>
+          <div className={`${viewMode === 'split' ? 'flex-1 border-r border-v0-border-primary' : 'flex-1'} p-0 relative`}>
             <textarea
               ref={textareaRef}
               value={content}
@@ -370,7 +370,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ className }) => 
               onClick={handleCursorChange}
               placeholder="Start writing your document..."
               className={`
-                w-full h-full resize-none border-0 outline-none bg-[#1E1E1E] text-[#D4D4D4]
+                w-full h-full resize-none border-0 outline-none bg-v0-dark-bg text-v0-text-primary
                 p-6 font-mono leading-relaxed
                 ${settings.fontSize === 'sm' ? 'text-sm' : settings.fontSize === 'lg' ? 'text-lg' : 'text-base'}
                 ${settings.wordWrap ? 'whitespace-pre-wrap' : 'whitespace-pre'}
@@ -385,7 +385,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ className }) => 
           
           {/* AI Suggestion Overlay */}
           {showSuggestion && aiSuggestion && (
-            <div className="absolute top-4 right-4 max-w-sm bg-card border border-[#3E3E42] rounded-lg shadow-lg p-4 z-10">
+            <div className="absolute top-4 right-4 max-w-sm bg-card border border-v0-border-primary rounded-lg shadow-lg p-4 z-10">
               <div className="flex items-start justify-between space-x-2 mb-2">
                 <div className="flex items-center space-x-2">
                   <Sparkles className="w-4 h-4 text-purple-500" />
@@ -393,13 +393,13 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ className }) => 
                 </div>
                 <button
                   onClick={dismissSuggestion}
-                  className="text-muted-foreground hover:text-[#D4D4D4] transition-colors"
+                  className="text-muted-foreground hover:text-v0-text-primary transition-colors"
                 >
                   ×
                 </button>
               </div>
               
-              <div className="text-sm text-muted-foreground mb-3 bg-[#2A2A2A]/50 p-2 rounded border-l-2 border-purple-500">
+              <div className="text-sm text-muted-foreground mb-3 bg-v0-bg-secondary/50 p-2 rounded border-l-2 border-purple-500">
                 {aiSuggestion}
               </div>
               
@@ -431,7 +431,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ className }) => 
         
         {/* Preview Mode or Split Mode - Preview */}
         {(viewMode === 'preview' || viewMode === 'split') && (
-          <div className={`${viewMode === 'split' ? 'flex-1' : 'flex-1'} bg-[#1E1E1E]`}>
+          <div className={`${viewMode === 'split' ? 'flex-1' : 'flex-1'} bg-v0-dark-bg`}>
             <MarkdownPreview 
               content={content}
               className="h-full overflow-auto p-6"
@@ -441,7 +441,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ className }) => 
       </div>
 
       {/* Editor Footer/Stats */}
-      <div className="flex items-center justify-between p-3 text-xs text-muted-foreground border-t border-[#3E3E42] bg-[#2A2A2A]/10">
+      <div className="flex items-center justify-between p-3 text-xs text-muted-foreground border-t border-v0-border-primary bg-v0-bg-secondary/10">
         <div className="flex items-center space-x-4">
           <span>Line 1, Column {cursorPosition + 1}</span>
           <span>UTF-8</span>

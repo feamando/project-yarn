@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
@@ -339,8 +339,8 @@ export function SidebarLayout({
   };
 
   const mainSpans = {
-    sm: { span: 9 as const, mdSpan: 10 as const },
-    md: { span: 8 as const, mdSpan: 9 as const },
+    sm: { span: 9 as const, mdSpan: 8 as const },
+    md: { span: 8 as const, mdSpan: 8 as const },
     lg: { span: 6 as const, mdSpan: 8 as const },
   };
 
@@ -360,13 +360,4 @@ export function SidebarLayout({
   );
 }
 
-// === EXPORT ALL COMPONENTS ===
-export {
-  ResponsiveGrid,
-  GridItem,
-  DashboardGrid,
-  CardGrid,
-  SidebarLayout,
-  gridVariants,
-  gridItemVariants,
-};
+

@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import * as React from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { invoke } from '@tauri-apps/api/tauri';
 import { listen, UnlistenFn } from '@tauri-apps/api/event';
 import { Button } from "@/components/ui/button";
@@ -8,7 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { LiveRegion, useLiveRegion } from "@/components/ui/live-region";
 import { V0AIProcessingPanel } from "@/components/v0-components/composition-patterns";
-import { ContextIndicator } from "@/components/v0-components/context-indicator";
+import { ContextIndicator } from "@/components/context-indicator";
 import { 
   Send, 
   User, 
@@ -154,7 +155,7 @@ export const StreamingChatUI: React.FC = () => {
         include_context: true // Enable context retrieval
       };
 
-      const response = await invoke<ChatResponse>('send_chat_message', request);
+      const response = await invoke<ChatResponse>('send_chat_message', request as any);
 
       if (!response.success) {
         throw new Error(response.message || 'Failed to send message');

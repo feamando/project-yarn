@@ -15,7 +15,7 @@ import {
   SortAsc,
   SortDesc,
 } from 'lucide-react';
-import { YarnLogo } from '@/components/v0-components/yarn-logo';
+import { YarnLogo } from '@/components/yarn-logo';
 import { V0SidebarItem } from '@/components/v0-components/composition-patterns';
 import { useAppStore, useCurrentProject, useProjectDocuments, Document } from '@/stores/useAppStore';
 

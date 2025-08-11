@@ -3,7 +3,8 @@
 // 
 // Main component for managing AI Blocks (reusable prompts)
 
-import React, { useEffect, useState } from 'react';
+import * as React from 'react';
+import { useEffect, useState } from 'react';
 import { useAiBlocksStore, AiBlock, AiBlockFilter, AiBlockSortBy, SortDirection } from '../../stores/useAiBlocksStore';
 import { V0AIProcessingPanel } from '../v0-components/composition-patterns';
 import { Button } from '../ui/button';
@@ -47,7 +48,6 @@ export const AiBlocksManager: React.FC = () => {
     isLoading,
     error,
     searchQuery,
-    currentFilter,
     sortBy,
     sortDirection,
     isCreateModalOpen,
@@ -183,7 +183,7 @@ export const AiBlocksManager: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#1E1E1E]">
+    <div className="flex flex-col h-full bg-v0-dark-bg">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b">
         <div className="flex items-center space-x-2">
@@ -376,25 +376,31 @@ export const AiBlocksManager: React.FC = () => {
       {/* Usage Stats Sidebar */}
       {usageStats && (
         <div className="border-t p-4">
-          <AiBlockStats stats={usageStats} />
+          <AiBlockStats />
         </div>
       )}
 
       {/* Modals */}
       <CreateAiBlockModal 
         isOpen={isCreateModalOpen}
-        categories={categories}
+        onClose={() => useAiBlocksStore.getState().closeCreateModal()}
       />
       
       <EditAiBlockModal 
         isOpen={isEditModalOpen}
+        onClose={() => useAiBlocksStore.getState().closeEditModal()}
         aiBlock={selectedAiBlock}
-        categories={categories}
       />
       
       <VariableInputModal 
         isOpen={isVariableModalOpen}
+        onClose={() => useAiBlocksStore.getState().closeVariableModal()}
         aiBlock={selectedAiBlock}
+        onUse={(processedPrompt: string) => {
+          // Handle the processed prompt - could integrate with chat or copy to clipboard
+          console.log('Processed prompt:', processedPrompt);
+          useAiBlocksStore.getState().closeVariableModal();
+        }}
       />
     </div>
   );

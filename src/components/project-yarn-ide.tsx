@@ -1,12 +1,12 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "src/components/ui/button"
-import { Input } from "src/components/ui/input"
-import { Textarea } from "src/components/ui/textarea"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "src/components/ui/dialog"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "src/components/ui/select"
-import { Badge } from "src/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Badge } from "@/components/ui/badge"
 import {
   FileText,
   Folder,
@@ -26,9 +26,9 @@ import {
 } from "lucide-react"
 
 // Import the new components
-import { YarnLogo } from "./v0-components/yarn-logo"
-import { ContextIndicator } from "./v0-components/context-indicator"
-import { IconSidebar } from "src/components/icon-sidebar"
+import { YarnLogo } from "@/components/yarn-logo"
+import { ContextIndicator } from "@/components/context-indicator"
+import { IconSidebar } from "@/components/icon-sidebar"
 
 interface FileNode {
   name: string
@@ -49,7 +49,7 @@ export function ProjectYarnIDE() {
   const [bedrockKey, setBedrockKey] = useState("")
   const [geminiKey, setGeminiKey] = useState("")
 
-  const [fileTree, setFileTree] = useState<FileNode[]>([
+  const [fileTree] = useState<FileNode[]>([
     {
       name: "Product Strategy",
       type: "folder",
@@ -101,7 +101,7 @@ export function ProjectYarnIDE() {
     },
   ])
 
-  const toggleFolder = (path: string) => {
+  const toggleFolder = () => {
     // Implementation for folder toggle
   }
 
@@ -317,11 +317,11 @@ export function ProjectYarnIDE() {
                     <div className="bg-white p-4 rounded-md text-black text-sm">
                       <div className="text-center space-y-3">
                         <div className="inline-block bg-blue-100 px-4 py-2 rounded-md font-medium">Welcome Screen</div>
-                        <div className="text-xs text-gray-500">↓</div>
+                        <div className="text-xs text-v0-text-muted">↓</div>
                         <div className="inline-block bg-green-100 px-4 py-2 rounded-md font-medium">
                           Create/Open Project
                         </div>
-                        <div className="text-xs text-gray-500">↓</div>
+                        <div className="text-xs text-v0-text-muted">↓</div>
                         <div className="inline-block bg-yellow-100 px-4 py-2 rounded-md font-medium">
                           Setup AI Providers
                         </div>

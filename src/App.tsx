@@ -11,7 +11,7 @@ import { CommandPalette } from "@/components/CommandPalette";
 import { VirtualizedFileList } from "@/components/explorer/VirtualizedFileList";
 import { AiBlocksManager } from "@/components/ai-blocks/AiBlocksManager";
 import { SkipLinks, useSkipLinkTarget } from "@/components/ui/skip-links";
-import { ContextIndicator } from "@/components/v0-components/context-indicator";
+import { ContextIndicator } from "@/components/context-indicator";
 import { V0Header, V0Breadcrumb, V0StatusCard } from "@/components/v0-components/composition-patterns";
 import { UpdaterDialog } from "./components/UpdaterDialog";
 import { UpdaterService, UpdateStatus } from "./services/updaterService";
@@ -223,7 +223,7 @@ function App() {
               <section id="editor" aria-label="Markdown editor" className="h-full flex flex-col">
                 {/* Breadcrumb Navigation and Status Cards */}
                 {(currentProject || currentDocument) && (
-                  <div className="border-b border-[#3E3E42] bg-[#1E1E1E] px-4 py-2">
+                  <div className="border-b border-v0-border-primary bg-v0-dark-bg px-4 py-2">
                     <div className="flex items-center justify-between">
                       <V0Breadcrumb 
                         items={[
@@ -287,8 +287,8 @@ function App() {
 
             {/* Right Panel - AI Chat */}
             <Panel defaultSize={20} minSize={15} maxSize={35}>
-              <aside id="ai-chat" className="h-full bg-[#2A2A2A]/10 border-l border-[#3E3E42]" role="complementary" aria-label="AI assistant">
-                <header className="p-4 border-b border-[#3E3E42]">
+              <aside id="ai-chat" className="h-full bg-v0-bg-secondary/10 border-l border-v0-border-primary" role="complementary" aria-label="AI assistant">
+                <header className="p-4 border-b border-v0-border-primary">
                   <div className="flex items-center space-x-2">
                     <MessageSquare className="h-4 w-4 text-primary" aria-hidden="true" />
                     <h2 className="font-medium text-sm">AI Assistant</h2>
@@ -327,7 +327,7 @@ function App() {
       </main>
 
       {/* Status Bar */}
-      <footer className="flex items-center justify-between p-2 text-xs text-muted-foreground border-t border-[#3E3E42] bg-[#2A2A2A]/30">
+      <footer className="flex items-center justify-between p-2 text-xs text-muted-foreground border-t border-v0-border-primary bg-v0-bg-secondary/30">
         <div className="flex items-center space-x-4">
           <span>Ready</span>
           <span>Local AI: Active</span>

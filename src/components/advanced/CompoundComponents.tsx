@@ -1,7 +1,8 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import * as React from 'react';
+import { createContext, useContext, useState, useCallback } from 'react';
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
-import { ChevronDown, Check, X } from "lucide-react";
+import { ChevronDown, Check } from "lucide-react";
 
 // === COMPOUND COMPONENTS PATTERN ===
 // Advanced component patterns using compound component architecture
@@ -589,9 +590,4 @@ export const Tabs = {
   Content: TabsContent,
 };
 
-// === EXPORT ALL COMPOUND COMPONENTS ===
-export {
-  Select,
-  Accordion,
-  Tabs,
-};
+

@@ -7,7 +7,7 @@ import { Badge } from './ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Progress } from './ui/progress';
 import { Loader2, Play, Download, AlertCircle, CheckCircle, Activity, Monitor, Zap, BarChart3 } from 'lucide-react';
-import { ContextIndicator } from '@/components/v0-components/context-indicator';
+import { ContextIndicator } from '@/components/context-indicator';
 
 /**
  * Performance Profiler Component

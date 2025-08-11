@@ -2,7 +2,7 @@
 // Task 6.1: Add automated accessibility testing to test suite
 
 import '@testing-library/jest-dom'
-import { expect } from 'vitest'
+import { expect, vi } from 'vitest'
 import { toHaveNoViolations } from 'jest-axe'
 
 // Extend Vitest expect with jest-axe matchers

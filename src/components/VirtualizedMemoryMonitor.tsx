@@ -12,8 +12,6 @@ import {
   AlertTriangle, 
   CheckCircle, 
   TrendingUp,
-  TrendingDown,
-  Minus,
   Database,
   Layers,
   Play,

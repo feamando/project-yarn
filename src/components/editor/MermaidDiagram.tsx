@@ -15,34 +15,11 @@ interface MermaidDiagramProps {
   diagramType?: string;
 }
 
-// Generate accessible alt text for Mermaid diagrams
-const generateAltText = (code: string, diagramType?: string): string => {
-  if (diagramType) {
-    return `${diagramType} diagram: ${code.split('\n')[0] || 'Interactive diagram'}`;
-  }
-  
-  // Auto-detect diagram type from code
-  const firstLine = code.trim().split('\n')[0].toLowerCase();
-  if (firstLine.includes('flowchart') || firstLine.includes('graph')) {
-    return `Flowchart diagram: ${code.split('\n')[0] || 'Process flow visualization'}`;
-  } else if (firstLine.includes('sequencediagram')) {
-    return `Sequence diagram: ${code.split('\n')[0] || 'Interaction sequence visualization'}`;
-  } else if (firstLine.includes('classDiagram')) {
-    return `Class diagram: ${code.split('\n')[0] || 'Class relationship visualization'}`;
-  } else if (firstLine.includes('gantt')) {
-    return `Gantt chart: ${code.split('\n')[0] || 'Project timeline visualization'}`;
-  } else if (firstLine.includes('pie')) {
-    return `Pie chart: ${code.split('\n')[0] || 'Data distribution visualization'}`;
-  } else {
-    return `Interactive diagram: ${code.split('\n')[0] || 'Visual diagram representation'}`;
-  }
-};
+
 
 export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({
   code,
   className = '',
-  altText,
-  diagramType,
 }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -128,9 +105,9 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({
               height: auto;
             }
             .error {
-              color: #ef4444;
-              background: #fef2f2;
-              border: 1px solid #fecaca;
+              color: var(--v0-red);
+              background: var(--v0-red-bg);
+              border: 1px solid var(--v0-red-border);
               border-radius: 6px;
               padding: 12px;
               font-size: 14px;

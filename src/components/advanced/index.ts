@@ -51,13 +51,6 @@ export {
   ThemedText,
   ThemedInput,
   ThemeSwitcher,
-  v0Theme,
-  lightTheme,
-  darkTheme,
-  type ThemeConfig,
-  type ThemeColors,
-  type ThemeSpacing,
-  type ThemeTypography,
 } from './ContextTheming';
 
 // === PATTERN CATEGORIES ===

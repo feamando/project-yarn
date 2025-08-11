@@ -72,7 +72,7 @@ export const propUtils = {
   /**
    * Extract props from a component type
    */
-  extractProps: <T extends ElementType>(component: T): ComponentProps<T> => {
+  extractProps: <T extends ElementType>(): ComponentProps<T> => {
     return {} as ComponentProps<T>;
   },
 
@@ -187,7 +187,7 @@ export const objectUtils = {
       if (typeGuards.isObject(sourceValue) && typeGuards.isObject(targetValue)) {
         result[key] = objectUtils.deepMerge(targetValue as any, sourceValue as any);
       } else if (sourceValue !== undefined) {
-        result[key] = sourceValue;
+        result[key] = sourceValue as T[Extract<keyof T, string>];
       }
     }
     

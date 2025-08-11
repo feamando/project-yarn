@@ -1,5 +1,5 @@
 import React, { forwardRef } from 'react';
-import { cva, type VariantProps } from "class-variance-authority";
+import { cva } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 // === POLYMORPHIC COMPONENT PATTERNS ===
@@ -96,14 +96,9 @@ const textVariants = cva(
   }
 );
 
-type TextProps = VariantProps<typeof textVariants>;
 
-type PolymorphicTextComponent = <C extends React.ElementType = "p">(
-  props: PolymorphicComponentPropWithRef<C, TextProps>
-) => React.ReactElement | null;
 
-export const Text: PolymorphicTextComponent = forwardRef(
-  <C extends React.ElementType = "p">(
+export const Text = forwardRef((
     {
       as,
       children,
@@ -115,8 +110,8 @@ export const Text: PolymorphicTextComponent = forwardRef(
       leading,
       tracking,
       ...props
-    }: PolymorphicComponentPropWithRef<C, TextProps>,
-    ref?: PolymorphicRef<C>
+    }: any,
+    ref?: any
   ) => {
     const Component = as || "p";
 
@@ -255,14 +250,11 @@ const boxVariants = cva(
   }
 );
 
-type BoxProps = VariantProps<typeof boxVariants>;
 
-type PolymorphicBoxComponent = <C extends React.ElementType = "div">(
-  props: PolymorphicComponentPropWithRef<C, BoxProps>
-) => React.ReactElement | null;
 
-export const Box: PolymorphicBoxComponent = forwardRef(
-  <C extends React.ElementType = "div">(
+
+
+export const Box = forwardRef((
     {
       as,
       children,
@@ -279,8 +271,8 @@ export const Box: PolymorphicBoxComponent = forwardRef(
       rounded,
       shadow,
       ...props
-    }: PolymorphicComponentPropWithRef<C, BoxProps>,
-    ref?: PolymorphicRef<C>
+    }: any,
+    ref?: any
   ) => {
     const Component = as || "div";
 
@@ -352,18 +344,11 @@ const polymorphicButtonVariants = cva(
   }
 );
 
-type PolymorphicButtonProps = VariantProps<typeof polymorphicButtonVariants> & {
-  loading?: boolean;
-  leftIcon?: React.ReactNode;
-  rightIcon?: React.ReactNode;
-};
 
-type PolymorphicButtonComponent = <C extends React.ElementType = "button">(
-  props: PolymorphicComponentPropWithRef<C, PolymorphicButtonProps>
-) => React.ReactElement | null;
 
-export const PolymorphicButton: PolymorphicButtonComponent = forwardRef(
-  <C extends React.ElementType = "button">(
+
+
+export const PolymorphicButton = forwardRef((
     {
       as,
       children,
@@ -376,8 +361,8 @@ export const PolymorphicButton: PolymorphicButtonComponent = forwardRef(
       rightIcon,
       disabled,
       ...props
-    }: PolymorphicComponentPropWithRef<C, PolymorphicButtonProps>,
-    ref?: PolymorphicRef<C>
+    }: any,
+    ref?: any
   ) => {
     const Component = as || "button";
     const isDisabled = disabled || loading;
@@ -438,16 +423,11 @@ const linkVariants = cva(
   }
 );
 
-type PolymorphicLinkProps = VariantProps<typeof linkVariants> & {
-  external?: boolean;
-};
 
-type PolymorphicLinkComponent = <C extends React.ElementType = "a">(
-  props: PolymorphicComponentPropWithRef<C, PolymorphicLinkProps>
-) => React.ReactElement | null;
 
-export const PolymorphicLink: PolymorphicLinkComponent = forwardRef(
-  <C extends React.ElementType = "a">(
+
+
+export const PolymorphicLink = forwardRef((
     {
       as,
       children,
@@ -457,8 +437,8 @@ export const PolymorphicLink: PolymorphicLinkComponent = forwardRef(
       underline,
       external = false,
       ...props
-    }: PolymorphicComponentPropWithRef<C, PolymorphicLinkProps>,
-    ref?: PolymorphicRef<C>
+    }: any,
+    ref?: any
   ) => {
     const Component = as || "a";
 
@@ -518,14 +498,11 @@ const headingVariants = cva(
   }
 );
 
-type HeadingProps = VariantProps<typeof headingVariants>;
 
-type PolymorphicHeadingComponent = <C extends React.ElementType = "h2">(
-  props: PolymorphicComponentPropWithRef<C, HeadingProps>
-) => React.ReactElement | null;
 
-export const Heading: PolymorphicHeadingComponent = forwardRef(
-  <C extends React.ElementType = "h2">(
+
+
+export const Heading = forwardRef((
     {
       as,
       children,
@@ -534,8 +511,8 @@ export const Heading: PolymorphicHeadingComponent = forwardRef(
       color,
       align,
       ...props
-    }: PolymorphicComponentPropWithRef<C, HeadingProps>,
-    ref?: PolymorphicRef<C>
+    }: any,
+    ref?: any
   ) => {
     const Component = as || "h2";
 
@@ -581,15 +558,9 @@ Heading.displayName = "Heading";
 <Heading as="h3" level={3} align="center">Centered subtitle</Heading>
 */
 
-// === EXPORT ALL POLYMORPHIC COMPONENTS ===
-export {
-  Text,
-  Box,
-  PolymorphicButton,
-  PolymorphicLink,
-  Heading,
-  // Export types for external use
-  type PolymorphicComponentProp,
-  type PolymorphicComponentPropWithRef,
-  type PolymorphicRef,
+// === TYPES FOR EXTERNAL USE ===
+export type {
+  PolymorphicComponentProp,
+  PolymorphicComponentPropWithRef,
+  PolymorphicRef,
 };

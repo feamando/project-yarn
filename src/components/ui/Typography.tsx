@@ -204,7 +204,7 @@ export function Heading4({ children, className, ...props }: Omit<TypographyProps
   );
 }
 
-export function BodyText({ children, className, ...props }: Omit<TypographyProps, 'as' | 'size' | 'weight' | 'leading'>) {
+export function BodyText({ children, className, ...props }: Omit<TypographyProps, 'as' | 'size' | 'leading'>) {
   return (
     <Typography
       as="p"
@@ -271,8 +271,8 @@ export function Link({ children, className, href, ...props }: Omit<TypographyPro
       as="a"
       color="link"
       className={cn("underline-offset-4 hover:underline cursor-pointer", className)}
-      href={href}
       {...props}
+      {...(href && { href })}
     >
       {children}
     </Typography>
@@ -412,17 +412,4 @@ export function TypographyShowcase() {
 <TypographyShowcase />
 */
 
-export {
-  Typography,
-  Heading1,
-  Heading2,
-  Heading3,
-  Heading4,
-  BodyText,
-  SmallText,
-  Caption,
-  Label,
-  Link,
-  Code,
-  TypographyShowcase,
-};
+

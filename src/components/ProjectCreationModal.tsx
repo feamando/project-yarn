@@ -1,13 +1,13 @@
 import * as React from "react"
 import { useState } from "react"
 
-import { YarnLogo } from "@/components/v0-components/yarn-logo"
+import { YarnLogo } from "@/components/yarn-logo"
 import { V0ModalHeader, V0ProjectForm, V0ProjectFormData } from "@/components/v0-components/composition-patterns";
 import { 
   Dialog, 
   DialogContent 
-} from "./ui/dialog"
-import { useAppStore } from "../stores/useAppStore"
+} from "@/components/ui/dialog"
+import { useAppStore } from "@/stores/useAppStore"
 import { invoke } from '@tauri-apps/api/tauri'
 
 interface ProjectCreationModalProps {

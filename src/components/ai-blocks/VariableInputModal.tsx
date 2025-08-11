@@ -4,7 +4,7 @@
 // Modal dialog for collecting variable values when using AI Blocks
 
 import React, { useState, useEffect } from 'react';
-import { useAiBlocksStore, AiBlock, AiBlockVariable } from '../../stores/useAiBlocksStore';
+import { useAiBlocksStore, AiBlock } from '../../stores/useAiBlocksStore';
 import {
   Dialog,
   DialogContent,
@@ -70,7 +70,7 @@ export const VariableInputModal: React.FC<VariableInputModalProps> = ({
 
     try {
       const result = await processTemplate(aiBlock.id, variableValues);
-      setProcessedPrompt(result);
+      setProcessedPrompt(result.processed_prompt);
     } catch (error) {
       console.error('Failed to process template:', error);
       setProcessedPrompt(aiBlock.prompt_template);
@@ -100,7 +100,7 @@ export const VariableInputModal: React.FC<VariableInputModalProps> = ({
 
     try {
       const result = await processTemplate(aiBlock.id, variableValues);
-      onUse(result);
+      onUse(result.processed_prompt);
       onClose();
     } catch (error) {
       console.error('Failed to process template:', error);

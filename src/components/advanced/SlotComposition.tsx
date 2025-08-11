@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useMemo } from 'react';
+import * as React from 'react';
+import { createContext, useContext, useMemo } from 'react';
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
@@ -72,7 +73,7 @@ interface SlotProps {
 }
 
 export function Slot({ name, children, fallback, className }: SlotProps) {
-  const { getSlot, hasSlot } = useSlotContext();
+  const { getSlot } = useSlotContext();
 
   // Register children as slot content if provided
   React.useEffect(() => {
@@ -249,8 +250,7 @@ export function SidebarLayout({
   sidebarWidth, 
   gap,
   collapsible = false,
-  collapsed = false,
-  onToggle 
+  collapsed = false
 }: SidebarLayoutProps) {
   return (
     <SlotProvider>
@@ -546,14 +546,4 @@ export function StackLayout({
 </StackLayout>
 */
 
-// === EXPORT ALL SLOT COMPONENTS ===
-export {
-  SlotProvider,
-  Slot,
-  SlotFill,
-  CardLayout,
-  SidebarLayout,
-  ModalLayout,
-  GridLayout,
-  StackLayout,
-};
+

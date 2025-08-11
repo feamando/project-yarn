@@ -1,7 +1,7 @@
 import * as React from "react"
 import { X, Plus } from "lucide-react"
-import { cn } from "../../lib/utils"
-import { Button } from "../ui/button"
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
 
 export interface Tab {
   id: string

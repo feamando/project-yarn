@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useMemo } from 'react';
+import * as React from 'react';
+import { createContext, useContext, useMemo } from 'react';
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
@@ -312,12 +313,12 @@ export function ThemeProvider({
   }), [customThemes]);
 
   const [currentTheme, setCurrentTheme] = React.useState<ThemeConfig>(
-    availableThemes[defaultTheme] || v0Theme
+    (availableThemes as Record<string, ThemeConfig>)[defaultTheme] || v0Theme
   );
 
   const setTheme = React.useCallback((theme: ThemeConfig | string) => {
     if (typeof theme === 'string') {
-      const themeConfig = availableThemes[theme];
+      const themeConfig = (availableThemes as Record<string, ThemeConfig>)[theme];
       if (themeConfig) {
         setCurrentTheme(themeConfig);
       }
@@ -742,20 +743,4 @@ function MyComponent() {
 <ThemeSwitcher showLabels />
 */
 
-// === EXPORT ALL THEMING COMPONENTS ===
-export {
-  ThemeProvider,
-  useTheme,
-  ThemedCard,
-  ThemedButton,
-  ThemedText,
-  ThemedInput,
-  ThemeSwitcher,
-  v0Theme,
-  lightTheme,
-  darkTheme,
-  type ThemeConfig,
-  type ThemeColors,
-  type ThemeSpacing,
-  type ThemeTypography,
-};
+

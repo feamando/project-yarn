@@ -41,8 +41,8 @@ jest.mock('../../stores/useAppStore', () => ({
 
 // Import components to test
 import App from '../../App'
-import { YarnLogo } from '../../components/v0-components/yarn-logo'
-import { ContextIndicator } from '../../components/v0-components/context-indicator'
+import { YarnLogo } from '../../components/yarn-logo'
+import { ContextIndicator } from '../../components/context-indicator'
 import { SkipLinks } from '../../components/ui/skip-links'
 import { StreamingChatUI } from '../../components/StreamingChatUI'
 import { AIModelSelector } from '../../components/AIModelSelector'
@@ -85,7 +85,6 @@ async function testComponentAccessibility(component: React.ReactElement, testNam
  * Test keyboard navigation for interactive elements
  */
 async function testKeyboardNavigation(component: React.ReactElement, testName: string) {
-  const user = userEvent.setup()
   const { container } = render(component)
   
   // Find all focusable elements
@@ -113,7 +112,7 @@ describe('Automated Accessibility Test Suite', () => {
 
     it('ContextIndicator should be fully accessible', async () => {
       await testComponentAccessibility(
-        <ContextIndicator status="processing" message="Processing..." />, 
+        <ContextIndicator isProcessing={true} processedItems={50} totalItems={100} />, 
         'ContextIndicator'
       )
     })

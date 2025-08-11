@@ -20,7 +20,7 @@ import {
   Zap,
   Globe
 } from 'lucide-react';
-import { ContextIndicator } from '@/components/v0-components/context-indicator';
+import { ContextIndicator } from '@/components/context-indicator';
 
 // Types for AI provider and model information
 interface AIProvider {

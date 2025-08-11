@@ -28,7 +28,8 @@ export function YarnLogo({
       <div 
         className="w-1.5 h-1.5 bg-v0-red rounded-full ml-0.5 mt-1"
         aria-hidden="true"
-      ></div>
+      >
+      </div>
     </div>
   )
 }

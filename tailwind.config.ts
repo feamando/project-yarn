@@ -33,18 +33,18 @@ const config: Config = {
         "yarn-red": "#FF4136",
         "yarn-green": "#4EC9B0",
         
-        // Layer 2: v0 Design System Tokens (Direct Mapping)
-        "v0-gold": "var(--v0-gold, #FFD700)",
-        "v0-gold-hover": "var(--v0-gold-hover, #E6C200)",
-        "v0-red": "var(--v0-red, #FF4136)",
-        "v0-teal": "var(--v0-teal, #4EC9B0)",
-        "v0-dark-bg": "var(--v0-dark-bg, #1E1E1E)",
-        "v0-bg-secondary": "var(--v0-bg-secondary, #252526)",
-        "v0-bg-tertiary": "var(--v0-bg-tertiary, #2D2D30)",
-        "v0-border-primary": "var(--v0-border-primary, #3E3E42)",
-        "v0-text-primary": "var(--v0-text-primary, #D4D4D4)",
-        "v0-text-muted": "var(--v0-text-muted, #858585)",
-        "v0-text-secondary": "var(--v0-text-secondary, #CCCCCC)",
+        // Layer 2: v0 Design System Tokens (Direct Values - Fixed Token Resolution)
+        "v0-gold": "#FFD700",
+        "v0-gold-hover": "#E6C200",
+        "v0-red": "#FF4136",
+        "v0-teal": "#4EC9B0",
+        "v0-dark-bg": "#1E1E1E",
+        "v0-bg-secondary": "#252526",
+        "v0-bg-tertiary": "#2D2D30",
+        "v0-border-primary": "#3E3E42",
+        "v0-text-primary": "#D4D4D4",
+        "v0-text-muted": "#858585",
+        "v0-text-secondary": "#CCCCCC",
         
         // Enhanced Text Hierarchy - Task 5.1.5
         "v0-text-heading": "var(--v0-text-heading, #FFFFFF)",

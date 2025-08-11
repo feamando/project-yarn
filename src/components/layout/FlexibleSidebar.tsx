@@ -1,4 +1,5 @@
-import React, { useState, useCallback } from 'react';
+import * as React from 'react';
+import { useState, useCallback } from 'react';
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight, Menu, X } from "lucide-react";
@@ -428,15 +429,4 @@ export function AIAssistantSidebar({
   );
 }
 
-// === EXPORT ALL COMPONENTS ===
-export {
-  FlexibleSidebar,
-  SidebarNavItem,
-  SidebarSection,
-  MobileSidebarTrigger,
-  FileExplorerSidebar,
-  AIAssistantSidebar,
-  sidebarVariants,
-  sidebarHeaderVariants,
-  sidebarContentVariants,
-};
+

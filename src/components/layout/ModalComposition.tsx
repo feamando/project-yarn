@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useCallback } from 'react';
+import * as React from 'react';
+import { useEffect, useRef } from 'react';
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import { X, AlertTriangle, CheckCircle, Info, AlertCircle } from "lucide-react";
@@ -164,11 +165,7 @@ export function ModalComposition({
 }: ModalCompositionProps) {
   const containerRef = useFocusTrap(isOpen);
 
-  const handleOverlayClick = useCallback((e: React.MouseEvent) => {
-    if (closeOnOverlayClick && e.target === e.currentTarget) {
-      onClose();
-    }
-  }, [closeOnOverlayClick, onClose]);
+
 
   if (!isOpen) return null;
 
@@ -442,14 +439,4 @@ export function FullscreenModal({
   );
 }
 
-// === EXPORT ALL COMPONENTS ===
-export {
-  ModalComposition,
-  ConfirmationModal,
-  AlertModal,
-  FormModal,
-  FullscreenModal,
-  useFocusTrap,
-  modalVariants,
-  modalHeaderVariants,
-};
+

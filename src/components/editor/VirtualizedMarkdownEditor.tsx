@@ -3,8 +3,8 @@ import { FixedSizeList as List } from 'react-window';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAppStore, useCurrentDocument } from '@/stores/useAppStore';
-import { FileText, Save, Eye, Edit3, Sparkles, Loader2 } from 'lucide-react';
-import { invoke } from '@tauri-apps/api/tauri';
+import { FileText, Save, Eye, Edit3, Sparkles } from 'lucide-react';
+
 
 /**
  * Virtualized Markdown Editor Component
@@ -119,7 +119,7 @@ export const VirtualizedMarkdownEditor: React.FC<VirtualizedMarkdownEditorProps>
   
   // AI Autocomplete state
   const [aiSuggestion, setAiSuggestion] = useState('');
-  const [isLoadingSuggestion, setIsLoadingSuggestion] = useState(false);
+
   const [showSuggestion, setShowSuggestion] = useState(false);
   
   // Virtualization state
@@ -203,27 +203,6 @@ export const VirtualizedMarkdownEditor: React.FC<VirtualizedMarkdownEditorProps>
   }, [currentDocument, content, hasUnsavedChanges]);
 
   // AI Autocomplete functions
-  const getAiSuggestion = useCallback(async (context: string) => {
-    if (!context.trim()) return;
-
-    setIsLoadingSuggestion(true);
-    try {
-      const suggestion = await invoke<string>('get_autocomplete', {
-        context: context,
-        maxTokens: 50
-      });
-      
-      if (suggestion && suggestion.trim()) {
-        setAiSuggestion(suggestion.trim());
-        setShowSuggestion(true);
-      }
-    } catch (error) {
-      console.error('Failed to get AI suggestion:', error);
-    } finally {
-      setIsLoadingSuggestion(false);
-    }
-  }, []);
-
   const acceptSuggestion = useCallback(() => {
     if (!aiSuggestion) return;
     
@@ -322,13 +301,7 @@ export const VirtualizedMarkdownEditor: React.FC<VirtualizedMarkdownEditorProps>
         </div>
         
         <div className="flex items-center space-x-2">
-          {/* AI Status Indicator */}
-          {isLoadingSuggestion && (
-            <div className="flex items-center space-x-2 text-xs text-blue-600">
-              <Loader2 className="w-3 h-3 animate-spin" />
-              <span>AI thinking...</span>
-            </div>
-          )}
+
           
           {showSuggestion && aiSuggestion && (
             <div className="flex items-center space-x-2 text-xs text-purple-600">
@@ -366,6 +339,7 @@ export const VirtualizedMarkdownEditor: React.FC<VirtualizedMarkdownEditorProps>
         <List
           ref={listRef}
           height={containerHeight}
+          width="100%"
           itemCount={lines.length || 1}
           itemSize={40}
           itemData={{
@@ -438,12 +412,7 @@ export const VirtualizedMarkdownEditor: React.FC<VirtualizedMarkdownEditorProps>
               <span>Virtualized ({performanceMetrics.visibleLines}/{performanceMetrics.totalLines} lines)</span>
             </span>
           )}
-          {isLoadingSuggestion && (
-            <span className="flex items-center space-x-1 text-blue-600">
-              <Loader2 className="w-3 h-3 animate-spin" />
-              <span>AI</span>
-            </span>
-          )}
+
         </div>
         
         <div className="flex items-center space-x-4">

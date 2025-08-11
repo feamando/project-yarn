@@ -1,5 +1,5 @@
 import { FolderOpen, FileText, Workflow, Layout, Users, ArrowLeftRight } from "lucide-react"
-import { Button } from "src/components/ui/button"
+import { Button } from "@/components/ui/button"
 
 interface IconSidebarProps {
   activeView: string

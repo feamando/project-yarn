@@ -75,22 +75,7 @@ export const accessibilityTestConfig: RunOptions = {
     'valid-lang': { enabled: true }
   },
   
-  // Test tags to include (WCAG 2.1 AA compliance)
-  tags: ['wcag2a', 'wcag2aa', 'wcag21aa', 'best-practice'],
-  
-  // Exclude experimental rules that might cause false positives
-  exclude: [
-    // Exclude experimental or beta rules
-    'color-contrast-enhanced', // AAA level
-    'focus-order-semantics' // Experimental
-  ],
-  
-  // Test environment configuration
-  environment: {
-    // Simulate different user preferences
-    reducedMotion: 'reduce',
-    colorScheme: 'light'
-  }
+  // Note: WCAG 2.1 AA compliance rules are enabled via individual rule configuration above
 }
 
 /**

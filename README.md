@@ -2,9 +2,9 @@
 
 An AI-native desktop application for professional writing and document management. Project Yarn is an "IDE for Documents" that provides a project-centric workflow with structured document lifecycles, local-first architecture, and seamless AI integration.
 
-## 🎉 Phase 2 Complete!
+## 🎉 Phase 2 Complete! v0 Design System Fully Restored!
 
-Project Yarn has successfully completed **Phase 2** development, delivering a comprehensive AI-native document IDE with advanced features:
+Project Yarn has successfully completed **Phase 2** development and **v0 Design System Recovery**, delivering a comprehensive AI-native document IDE with advanced features and a consistent, accessible UI:
 
 ## 🚀 Features
 
@@ -28,6 +28,9 @@ Project Yarn has successfully completed **Phase 2** development, delivering a co
 - **AI Settings Panel**: Comprehensive credential and provider management
 - **Local-First Architecture**: Your data stays secure on your machine
 - **Cross-Platform Support**: Windows, macOS (Intel & Apple Silicon), and Linux
+- **v0 Design System**: Fully restored consistent UI with design tokens, animations, and accessibility
+- **Enhanced Accessibility**: WCAG 2.1 AA compliance with keyboard navigation and screen reader support
+- **Dark Theme Optimization**: Improved contrast ratios and theme-aware components
 
 ## 🛠️ Tech Stack
 

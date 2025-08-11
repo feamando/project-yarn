@@ -22,7 +22,7 @@ import {
   GitBranch,
   Target
 } from 'lucide-react';
-import { ContextIndicator } from '@/components/v0-components/context-indicator';
+import { ContextIndicator } from '@/components/context-indicator';
 
 // Document state types based on FSM implementation
 type DocumentState = 
@@ -52,19 +52,7 @@ interface Document {
   projectId: string;
 }
 
-// Transformation request/response types
-interface TransformationRequest {
-  documentId: string;
-  targetState: DocumentState;
-  aiAssisted?: boolean;
-}
 
-interface TransformationResponse {
-  success: boolean;
-  message?: string;
-  newState?: DocumentState;
-  transformedContent?: string;
-}
 
 // Available transformation options based on FSM logic
 const TRANSFORMATION_OPTIONS: TransformationOption[] = [
@@ -148,7 +136,7 @@ export const DocumentTransformationUI: React.FC<DocumentTransformationUIProps> =
   }, [document]);
 
   // Get state display info
-  const getStateInfo = (state: DocumentState) => {
+  const getStateInfo = (state: DocumentState | 'review' | 'published') => {
     const stateConfig = {
       draft: { label: 'Draft', color: 'bg-gray-500', description: 'Initial draft state' },
       memo: { label: 'Memo', color: 'bg-blue-500', description: 'Structured memo format' },
@@ -157,7 +145,7 @@ export const DocumentTransformationUI: React.FC<DocumentTransformationUIProps> =
       epic_breakdown: { label: 'Epic Breakdown', color: 'bg-orange-500', description: 'Epic with task breakdown' },
       archived: { label: 'Archived', color: 'bg-red-500', description: 'Archived document' }
     };
-    return stateConfig[state] || stateConfig.draft;
+    return stateConfig[state as DocumentState] || stateConfig.draft;
   };
 
   // Handle transformation
@@ -249,7 +237,7 @@ export const DocumentTransformationUI: React.FC<DocumentTransformationUIProps> =
       
       <CardContent className="space-y-4">
         {/* Current Document Info */}
-        <div className="p-3 bg-[#2A2A2A]/50 rounded-lg">
+        <div className="p-3 bg-v0-bg-secondary/50 rounded-lg">
           <div className="flex items-center justify-between mb-2">
             <span className="font-medium text-sm">{document.name}</span>
             <Badge className={`text-xs ${currentStateInfo.color} text-white`}>
@@ -330,7 +318,7 @@ export const DocumentTransformationUI: React.FC<DocumentTransformationUIProps> =
 
             {/* Transformation Preview */}
             {selectedOption && (
-              <div className="p-3 bg-[#2A2A2A]/30 rounded-lg">
+              <div className="p-3 bg-v0-bg-secondary/30 rounded-lg">
                 <div className="flex items-center justify-center space-x-3 text-sm">
                   <Badge className={`${currentStateInfo.color} text-white`}>
                     {currentStateInfo.label}
@@ -347,7 +335,7 @@ export const DocumentTransformationUI: React.FC<DocumentTransformationUIProps> =
             )}
 
             {/* AI Assistance Toggle */}
-            <div className="flex items-center justify-between p-3 bg-[#2A2A2A]/30 rounded-lg">
+            <div className="flex items-center justify-between p-3 bg-v0-bg-secondary/30 rounded-lg">
               <div className="flex items-center space-x-2">
                 <Zap className="h-4 w-4 text-primary" />
                 <span className="text-sm font-medium">AI-Assisted Transformation</span>

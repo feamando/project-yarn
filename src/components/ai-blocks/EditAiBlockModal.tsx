@@ -169,6 +169,7 @@ export const EditAiBlockModal: React.FC<EditAiBlockModalProps> = ({
           ...prev.variables,
           {
             name: variable,
+            var_type: 'text', // Default to text type
             description: variableInput.description.trim(),
             required: variableInput.required,
             default_value: variableInput.default_value.trim() || undefined,

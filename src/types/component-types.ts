@@ -4,6 +4,7 @@
  */
 
 import type { ComponentProps, ElementType, ReactNode } from 'react';
+import { isValidElement } from 'react';
 
 // Base component props that all components should extend
 export interface BaseComponentProps {
@@ -323,7 +324,7 @@ export type RegisteredComponent<T extends keyof ComponentRegistry> = ComponentRe
 
 // Type guards
 export const isReactElement = (value: any): value is React.ReactElement => {
-  return React.isValidElement(value);
+  return isValidElement(value);
 };
 
 export const isFunction = (value: any): value is Function => {

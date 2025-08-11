@@ -12,7 +12,6 @@ import {
   TrendingDown, 
   AlertTriangle, 
   CheckCircle, 
-  Zap,
   RefreshCw,
   Play,
   Pause,
@@ -312,13 +311,7 @@ export const RenderPerformanceTracker: React.FC = () => {
     return `${ms.toFixed(1)}ms`;
   };
 
-  const getSeverityColor = (severity: 'low' | 'medium' | 'high'): string => {
-    switch (severity) {
-      case 'low': return 'text-yellow-600';
-      case 'medium': return 'text-orange-600';
-      case 'high': return 'text-red-600';
-    }
-  };
+
 
   const getSeverityIcon = (severity: 'low' | 'medium' | 'high') => {
     switch (severity) {
@@ -336,8 +329,8 @@ export const RenderPerformanceTracker: React.FC = () => {
     }
 
     components.sort((a, b) => {
-      const aVal = a[state.sortBy];
-      const bVal = b[state.sortBy];
+      const aVal = state.sortBy === 'name' ? a.componentName : a[state.sortBy as keyof ComponentRenderData];
+      const bVal = state.sortBy === 'name' ? b.componentName : b[state.sortBy as keyof ComponentRenderData];
       
       if (typeof aVal === 'string' && typeof bVal === 'string') {
         return state.sortOrder === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);

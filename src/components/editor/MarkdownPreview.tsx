@@ -6,7 +6,7 @@
 import React, { useMemo } from 'react';
 import { MermaidDiagram } from './MermaidDiagram';
 import { replaceMermaidBlocks, validateMermaidSyntax } from '../../utils/markdownParser';
-import { YarnLogo } from '../v0-components/yarn-logo';
+import { YarnLogo } from '../yarn-logo';
 
 interface MarkdownPreviewProps {
   content: string;
@@ -93,7 +93,7 @@ export const MarkdownPreview: React.FC<MarkdownPreviewProps> = ({
                     <summary className="cursor-pointer text-sm text-muted-foreground">
                       View Source
                     </summary>
-                    <pre className="mt-2 text-xs font-mono bg-[#2A2A2A] p-2 rounded overflow-x-auto">
+                    <pre className="mt-2 text-xs font-mono bg-v0-bg-secondary p-2 rounded overflow-x-auto">
                       <code>{mermaidBlock.code}</code>
                     </pre>
                   </details>
@@ -117,7 +117,7 @@ export const MarkdownPreview: React.FC<MarkdownPreviewProps> = ({
   };
 
   return (
-    <div className={`markdown-preview h-full overflow-y-auto ${className}`}>
+    <div className={`markdown-preview h-full overflow-y-auto bg-v0-dark-bg text-v0-text-primary ${className}`}>
       <div className="p-6">
         {renderContent()}
       </div>

@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogFooter } from './ui/dialog';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Alert, AlertDescription } from './ui/alert';
-import { YarnLogo } from '@/components/v0-components/yarn-logo';
+import { YarnLogo } from '@/components/yarn-logo';
 import { V0ModalHeader } from '@/components/v0-components/composition-patterns';
 import { Loader2, Download, RefreshCw, AlertCircle, CheckCircle } from 'lucide-react';
 

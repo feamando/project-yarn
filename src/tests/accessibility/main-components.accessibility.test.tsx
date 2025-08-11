@@ -1,14 +1,13 @@
 // Main Application Components Accessibility Tests
 // Task 3.3.3: Accessibility Audit Implementation
 
-import React from 'react'
+
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { 
   runComprehensiveAccessibilityTest,
   testModalFocusManagement,
-  AccessibilityAuditReport,
-  type AccessibilityIssue
+  AccessibilityAuditReport
 } from './accessibility-test-utils'
 
 // Mock Zustand store
@@ -54,7 +53,7 @@ describe('Main Application Components Accessibility Tests', () => {
 
   describe('MarkdownEditor Component', () => {
     it('should be fully accessible', async () => {
-      const { container } = render(<MarkdownEditor />)
+      render(<MarkdownEditor />)
 
       // Test basic accessibility
       await runComprehensiveAccessibilityTest(<MarkdownEditor />, {
@@ -225,7 +224,7 @@ describe('Main Application Components Accessibility Tests', () => {
       expect(grid).toBeInTheDocument()
 
       // Test arrow key navigation (would need proper implementation)
-      const firstCard = grid.querySelector('[role="gridcell"]')
+      const firstCard = grid.querySelector('[role="gridcell"]') as HTMLElement
       if (firstCard) {
         firstCard.focus()
         await user.keyboard('{ArrowRight}')
@@ -236,9 +235,7 @@ describe('Main Application Components Accessibility Tests', () => {
 
   describe('CreateAiBlockModal Component', () => {
     it('should manage focus correctly', async () => {
-      const user = userEvent.setup()
       const onClose = jest.fn()
-      const onCreate = jest.fn()
 
       render(
         <div>
@@ -246,7 +243,6 @@ describe('Main Application Components Accessibility Tests', () => {
           <CreateAiBlockModal 
             isOpen={true} 
             onClose={onClose} 
-            onCreate={onCreate} 
           />
         </div>
       )
@@ -255,20 +251,18 @@ describe('Main Application Components Accessibility Tests', () => {
       await testModalFocusManagement(
         { container: document.body, getByTestId: screen.getByTestId } as any,
         'open-modal',
-        'create-ai-block-modal',
-        'close-button'
+        'create-ai-block-modal'
       )
     })
 
     it('should have proper form labels and validation', async () => {
       const onClose = jest.fn()
-      const onCreate = jest.fn()
+
 
       render(
         <CreateAiBlockModal 
           isOpen={true} 
           onClose={onClose} 
-          onCreate={onCreate} 
         />
       )
 
@@ -285,13 +279,12 @@ describe('Main Application Components Accessibility Tests', () => {
     it('should announce validation errors', async () => {
       const user = userEvent.setup()
       const onClose = jest.fn()
-      const onCreate = jest.fn()
+
 
       render(
         <CreateAiBlockModal 
           isOpen={true} 
           onClose={onClose} 
-          onCreate={onCreate} 
         />
       )
 
@@ -355,7 +348,7 @@ describe('Main Application Components Accessibility Tests', () => {
       await user.keyboard('{Shift>}{Enter}{/Shift}')
       await user.type(messageInput, 'Line 2')
       
-      expect(messageInput.value).toContain('\n')
+      expect((messageInput as HTMLTextAreaElement).value).toContain('\n')
     })
   })
 

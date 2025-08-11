@@ -1,8 +1,49 @@
-@import './styles/design-tokens.css';
+
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Direct v0 token utility classes - guaranteed to work */
+.text-v0-gold {
+  color: #FFD700 !important;
+}
+
+.bg-v0-red {
+  background-color: #FF4136 !important;
+}
+
+.text-v0-teal {
+  color: #4EC9B0 !important;
+}
+
+.bg-v0-dark-bg {
+  background-color: #1E1E1E !important;
+}
+
+.bg-v0-bg-secondary {
+  background-color: #252526 !important;
+}
+
+.bg-v0-bg-tertiary {
+  background-color: #2D2D30 !important;
+}
+
+.border-v0-border-primary {
+  border-color: #3E3E42 !important;
+}
+
+.text-v0-text-primary {
+  color: #D4D4D4 !important;
+}
+
+.text-v0-text-muted {
+  color: #858585 !important;
+}
+
+.text-v0-text-secondary {
+  color: #CCCCCC !important;
+}
 
 @layer base {
   :root {
@@ -36,16 +77,27 @@
 
     --radius: 0.5rem;
 
-    /* V0 Brand Colors */
-    --color-brand-gold: #FFD700;
-    --color-brand-red: #FF4136;
-    --color-brand-teal: #4EC9B0;
-    
-    /* V0 Dark Theme Colors */
-    --color-dark-bg: #1E1E1E;
-    --color-dark-border: #3E3E42;
-    --color-dark-text: #D4D4D4;
-    --color-dark-text-muted: #858585;
+    /* V0 Design System Tokens - Available globally */
+    --v0-gold: #FFD700;
+    --v0-gold-hover: #E6C200;
+    --v0-red: #FF4136;
+    --v0-teal: #4EC9B0;
+    --v0-dark-bg: #1E1E1E;
+    --v0-bg-secondary: #252526;
+    --v0-bg-tertiary: #2D2D30;
+    --v0-border-primary: #3E3E42;
+    --v0-text-primary: #D4D4D4;
+    --v0-text-muted: #858585;
+    --v0-text-secondary: #CCCCCC;
+    --v0-text-heading: #FFFFFF;
+    --v0-text-emphasis: #FFD700;
+    --v0-text-link: #4FC3F7;
+    --v0-text-link-hover: #29B6F6;
+    --v0-text-disabled: #666666;
+    --v0-text-placeholder: #999999;
+    --v0-text-success: #4EC9B0;
+    --v0-text-warning: #FFD700;
+    --v0-text-error: #FF4136;
   }
 
   .dark {
@@ -80,3 +132,18 @@
 }
 
 /* Base layer removed to fix Tailwind compilation issues */
+
+/* Ensure textarea elements use dark theme */
+textarea {
+  background-color: var(--v0-dark-bg, #1E1E1E) !important;
+  color: var(--v0-text-primary, #D4D4D4) !important;
+}
+
+/* Ensure all editor content areas use dark theme */
+.bg-v0-dark-bg {
+  background-color: var(--v0-dark-bg, #1E1E1E) !important;
+}
+
+.text-v0-text-primary {
+  color: var(--v0-text-primary, #D4D4D4) !important;
+}

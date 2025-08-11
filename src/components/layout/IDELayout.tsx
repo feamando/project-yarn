@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { cn } from "@/lib/utils";
 
@@ -296,17 +296,4 @@ export function CompleteIDELayout({
   );
 }
 
-// === EXPORT ALL COMPONENTS ===
-export {
-  IDELayout,
-  IDEPanelGroup,
-  IDELeftPanel,
-  IDECenterPanel,
-  IDERightPanel,
-  IDEResizeHandle,
-  IDEPanelHeader,
-  IDEPanelContent,
-  IDEEditorHeader,
-  IDEStatusBar,
-  CompleteIDELayout
-};
+

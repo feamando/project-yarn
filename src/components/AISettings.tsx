@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { V0FormField, V0Header } from "@/components/v0-components/composition-patterns";
-import { ContextIndicator } from "@/components/v0-components/context-indicator";
+import { ContextIndicator } from "@/components/context-indicator";
 import { 
   Key, 
   CheckCircle, 
@@ -247,13 +247,13 @@ export function AISettings() {
   };
 
   return (
-    <div className="h-full overflow-auto p-6 bg-[#1E1E1E]">
+    <div className="h-full overflow-auto p-6 bg-v0-dark-bg">
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
         <V0Header
           title="AI Settings"
           actions={
-            <div className="text-sm text-[#858585]">
+            <div className="text-sm text-v0-text-muted">
               Configure your AI providers and manage credentials
             </div>
           }
@@ -278,7 +278,7 @@ export function AISettings() {
                   className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition-colors ${
                     activeProvider === provider.id
                       ? 'border-primary bg-primary/5'
-                      : 'border-[#3E3E42] hover:bg-v0-border-primary/50'
+                      : 'border-v0-border-primary hover:bg-v0-border-primary/50'
                   }`}
                   onClick={() => selectProvider(provider.id)}
                 >

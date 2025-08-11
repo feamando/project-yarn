@@ -3,7 +3,7 @@
  * Provides type safety and better developer experience for custom hooks
  */
 
-import { DependencyList, EffectCallback, MutableRefObject, RefObject } from 'react';
+import { DependencyList, RefObject } from 'react';
 
 // Base hook types
 export interface HookOptions {

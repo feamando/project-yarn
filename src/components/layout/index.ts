@@ -23,8 +23,6 @@ export {
   DashboardGrid,
   CardGrid,
   SidebarLayout,
-  gridVariants,
-  gridItemVariants,
 } from './ResponsiveGrid';
 
 // === FLEXIBLE SIDEBAR PATTERNS ===
@@ -35,9 +33,6 @@ export {
   MobileSidebarTrigger,
   FileExplorerSidebar,
   AIAssistantSidebar,
-  sidebarVariants,
-  sidebarHeaderVariants,
-  sidebarContentVariants,
 } from './FlexibleSidebar';
 
 // === MODAL/DIALOG COMPOSITIONS ===
@@ -47,9 +42,6 @@ export {
   AlertModal,
   FormModal,
   FullscreenModal,
-  useFocusTrap,
-  modalVariants,
-  modalHeaderVariants,
 } from './ModalComposition';
 
 // === CARD/PANEL COMPOSITIONS ===

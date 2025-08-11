@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { TypographyShowcase } from '@/components/ui/Typography';
 
 // === TYPOGRAPHY TEST COMPONENT ===

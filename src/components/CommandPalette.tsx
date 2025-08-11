@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import * as React from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { V0ModalHeader } from "@/components/v0-components/composition-patterns";
-import { YarnLogo } from "@/components/v0-components/yarn-logo";
+import { YarnLogo } from "@/components/yarn-logo";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -276,7 +277,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                     {categoryNames[category as keyof typeof categoryNames]}
                   </h3>
                   <div className="space-y-1">
-                    {categoryCommands.map((command, index) => {
+                    {categoryCommands.map((command, _) => {
                       const globalIndex = filteredCommands.indexOf(command);
                       const isSelected = globalIndex === selectedIndex;
                       
@@ -319,7 +320,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         </ScrollArea>
 
         {/* Footer */}
-        <div className="px-4 py-2 border-t bg-[#2A2A2A]/30">
+        <div className="px-4 py-2 border-t bg-v0-bg-secondary/30">
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>Use ↑↓ to navigate, Enter to select, Esc to close</span>
             <span>{filteredCommands.length} commands</span>
