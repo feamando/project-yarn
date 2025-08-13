@@ -79,7 +79,21 @@
 - [x] 5.4 Remove empty directories and update barrel exports
   - Centralized simple layouts in `layout/index.ts`
 - [x] 5.5 Validate all functionality preserved after restructuring (TypeScript clean)
-- [ ] 5.6 Commit Phase 4 changes with structure documentation
+- [x] 5.6 Commit Phase 4 changes with structure documentation
+
+#### Phase 4 Structure Documentation
+
+- Consolidation summary:
+  - Merged `src/components/layouts/` into `src/components/layout/` to reduce duplication and improve discoverability.
+- Path changes and exports:
+  - Simple layouts now live under `src/components/layout/` and are re-exported via `src/components/layout/index.ts`.
+  - Added shims:
+    - `src/components/layout/file-tree.tsx` → re-exports from former `layouts/file-tree`.
+    - `src/components/layout/tab-system.tsx` → re-exports from former `layouts/tab-system`.
+- Import impact:
+  - Existing imports continue to work via `layout/index.ts` re-exports; no breaking changes detected in type-check.
+- Rationale:
+  - Single source of truth for layout compositions; aligns with reference UI organization and simplifies maintenance.
 
 ### 6.0 Phase 5: Component Consolidation (TP-013)
 - [ ] 6.1 Execute TP-013: Component Consolidation
