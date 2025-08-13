@@ -2,10 +2,11 @@ import React, { useState, useCallback, useEffect, useRef } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { useAppStore, useCurrentDocument } from '@/stores/useAppStore'
-import { FileText, Save, Eye, Edit3, Sparkles, Loader2, SplitSquareHorizontal } from 'lucide-react'
+import { FileText, Save, Eye, Edit3, Sparkles, SplitSquareHorizontal } from 'lucide-react'
 import { invoke } from '@tauri-apps/api/tauri'
 import { MarkdownPreview } from './MarkdownPreview'
 import { parseMermaidBlocks } from '../../utils/markdownParser'
+import { V0AIProcessingPanel, V0StatusCard } from '../v0-components/composition-patterns'
 
 interface MarkdownEditorProps {
   className?: string
@@ -225,7 +226,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ className }) => 
       <div className={`h-full flex items-center justify-center ${className}`}>
         <Card className="max-w-md">
           <CardHeader className="text-center">
-            <div className="mx-auto w-12 h-12 bg-muted rounded-lg flex items-center justify-center mb-4">
+            <div className="mx-auto w-12 h-12 bg-v0-bg-secondary rounded-lg flex items-center justify-center mb-4">
               <FileText className="h-6 w-6 text-muted-foreground" />
             </div>
             <CardTitle className="text-lg">No Document Selected</CardTitle>
@@ -247,7 +248,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ className }) => 
   return (
     <div className={`h-full flex flex-col ${className}`}>
       {/* Editor Header */}
-      <div className="flex items-center justify-between p-4 border-b border-border bg-muted/20">
+      <div className="flex items-center justify-between p-4 border-b border-v0-border-primary bg-v0-bg-secondary/20">
         <div className="flex items-center space-x-3">
           <FileText className="h-4 w-4 text-primary" />
           <div>
@@ -261,9 +262,15 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ className }) => 
         <div className="flex items-center space-x-2">
           {/* AI Status Indicator */}
           {isLoadingSuggestion && (
-            <div className="flex items-center space-x-2 text-xs text-blue-600">
-              <Loader2 className="w-3 h-3 animate-spin" />
-              <span>AI thinking...</span>
+            <div className="flex items-center space-x-2">
+              <V0AIProcessingPanel
+                isProcessing={true}
+                processedItems={0}
+                totalItems={1}
+                title="AI Assistant"
+                status="active"
+                className="scale-75 origin-left"
+              />
             </div>
           )}
           
@@ -282,22 +289,27 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ className }) => 
           )}
           
           <Button 
-            variant="outline" 
+            variant={hasUnsavedChanges ? "default" : "outline"}
             size="sm" 
             onClick={() => handleSave()}
             disabled={isSaving || !hasUnsavedChanges}
+            className={hasUnsavedChanges ? "bg-v0-gold hover:bg-v0-gold/90 text-black border-v0-gold" : ""}
           >
             <Save className="h-3 w-3 mr-1" />
             {isSaving ? 'Saving...' : 'Save'}
           </Button>
           
           {/* View Mode Toggle */}
-          <div className="flex items-center border border-border rounded-md" role="group" aria-label="Editor view mode">
+          <div className="flex items-center border border-v0-border-primary rounded-md bg-v0-bg-secondary" role="group" aria-label="Editor view mode">
             <Button 
-              variant={viewMode === 'edit' ? 'default' : 'ghost'}
+              variant="ghost"
               size="sm"
               onClick={() => setViewMode('edit')}
-              className="rounded-r-none border-r border-border h-8 px-3"
+              className={`rounded-r-none border-r border-v0-border-primary h-8 px-3 ${
+                viewMode === 'edit' 
+                  ? 'bg-v0-teal hover:bg-v0-teal/90 text-black' 
+                  : 'hover:bg-v0-border-primary'
+              }`}
               aria-pressed={viewMode === 'edit'}
               aria-label="Edit mode - Write and edit markdown content"
             >
@@ -305,10 +317,14 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ className }) => 
               Edit
             </Button>
             <Button 
-              variant={viewMode === 'preview' ? 'default' : 'ghost'}
+              variant="ghost"
               size="sm"
               onClick={() => setViewMode('preview')}
-              className="rounded-none border-r border-border h-8 px-3"
+              className={`rounded-none border-r border-v0-border-primary h-8 px-3 ${
+                viewMode === 'preview' 
+                  ? 'bg-v0-teal hover:bg-v0-teal/90 text-black' 
+                  : 'hover:bg-v0-border-primary'
+              }`}
               aria-pressed={viewMode === 'preview'}
               aria-label="Preview mode - View rendered markdown with diagrams"
             >
@@ -316,10 +332,14 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ className }) => 
               Preview
             </Button>
             <Button 
-              variant={viewMode === 'split' ? 'default' : 'ghost'}
+              variant="ghost"
               size="sm"
               onClick={() => setViewMode('split')}
-              className="rounded-l-none h-8 px-3"
+              className={`rounded-l-none h-8 px-3 ${
+                viewMode === 'split' 
+                  ? 'bg-v0-teal hover:bg-v0-teal/90 text-black' 
+                  : 'hover:bg-v0-border-primary'
+              }`}
               aria-pressed={viewMode === 'split'}
               aria-label="Split mode - Edit and preview side by side"
             >
@@ -334,7 +354,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ className }) => 
       <div className="flex-1 flex relative">
         {/* Edit Mode or Split Mode - Editor */}
         {(viewMode === 'edit' || viewMode === 'split') && (
-          <div className={`${viewMode === 'split' ? 'flex-1 border-r border-border' : 'flex-1'} p-0 relative`}>
+          <div className={`${viewMode === 'split' ? 'flex-1 border-r border-v0-border-primary' : 'flex-1'} p-0 relative`}>
             <textarea
               ref={textareaRef}
               value={content}
@@ -350,7 +370,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ className }) => 
               onClick={handleCursorChange}
               placeholder="Start writing your document..."
               className={`
-                w-full h-full resize-none border-0 outline-none bg-background text-foreground
+                w-full h-full resize-none border-0 outline-none bg-v0-dark-bg text-v0-text-primary
                 p-6 font-mono leading-relaxed
                 ${settings.fontSize === 'sm' ? 'text-sm' : settings.fontSize === 'lg' ? 'text-lg' : 'text-base'}
                 ${settings.wordWrap ? 'whitespace-pre-wrap' : 'whitespace-pre'}
@@ -365,7 +385,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ className }) => 
           
           {/* AI Suggestion Overlay */}
           {showSuggestion && aiSuggestion && (
-            <div className="absolute top-4 right-4 max-w-sm bg-card border border-border rounded-lg shadow-lg p-4 z-10">
+            <div className="absolute top-4 right-4 max-w-sm bg-card border border-v0-border-primary rounded-lg shadow-lg p-4 z-10">
               <div className="flex items-start justify-between space-x-2 mb-2">
                 <div className="flex items-center space-x-2">
                   <Sparkles className="w-4 h-4 text-purple-500" />
@@ -373,13 +393,13 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ className }) => 
                 </div>
                 <button
                   onClick={dismissSuggestion}
-                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-muted-foreground hover:text-v0-text-primary transition-colors"
                 >
                   ×
                 </button>
               </div>
               
-              <div className="text-sm text-muted-foreground mb-3 bg-muted/50 p-2 rounded border-l-2 border-purple-500">
+              <div className="text-sm text-muted-foreground mb-3 bg-v0-bg-secondary/50 p-2 rounded border-l-2 border-purple-500">
                 {aiSuggestion}
               </div>
               
@@ -411,7 +431,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ className }) => 
         
         {/* Preview Mode or Split Mode - Preview */}
         {(viewMode === 'preview' || viewMode === 'split') && (
-          <div className={`${viewMode === 'split' ? 'flex-1' : 'flex-1'} bg-background`}>
+          <div className={`${viewMode === 'split' ? 'flex-1' : 'flex-1'} bg-v0-dark-bg`}>
             <MarkdownPreview 
               content={content}
               className="h-full overflow-auto p-6"
@@ -421,31 +441,60 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ className }) => 
       </div>
 
       {/* Editor Footer/Stats */}
-      <div className="flex items-center justify-between p-3 text-xs text-muted-foreground border-t border-border bg-muted/10">
+      <div className="flex items-center justify-between p-3 text-xs text-muted-foreground border-t border-v0-border-primary bg-v0-bg-secondary/10">
         <div className="flex items-center space-x-4">
           <span>Line 1, Column {cursorPosition + 1}</span>
           <span>UTF-8</span>
           <span>Markdown</span>
           {mermaidBlocks.length > 0 && (
-            <span className="flex items-center space-x-1 text-green-600">
-              <div className="w-2 h-2 rounded-full bg-green-500" />
+            <span className="flex items-center space-x-1 text-v0-teal">
+              <div className="w-2 h-2 rounded-full bg-v0-teal" />
               <span>{mermaidBlocks.length} diagram{mermaidBlocks.length !== 1 ? 's' : ''}</span>
             </span>
           )}
           {isLoadingSuggestion && (
-            <span className="flex items-center space-x-1 text-blue-600">
-              <Loader2 className="w-3 h-3 animate-spin" />
-              <span>AI</span>
+            <span className="flex items-center space-x-1">
+              <V0AIProcessingPanel
+                isProcessing={true}
+                processedItems={0}
+                totalItems={1}
+                title="AI"
+                status="active"
+                className="scale-50 origin-left"
+              />
             </span>
           )}
         </div>
         
-        <div className="flex items-center space-x-4">
-          <span>{wordCount} words</span>
-          <span>{charCount} characters</span>
-          <span>{currentDocument.state}</span>
+        <div className="flex items-center space-x-2">
+          <V0StatusCard
+            title="Words"
+            value={wordCount}
+            icon={<FileText className="w-3 h-3" />}
+            variant="default"
+            className="scale-75 origin-left"
+          />
+          <V0StatusCard
+            title="Characters"
+            value={charCount}
+            icon={<Edit3 className="w-3 h-3" />}
+            variant="default"
+            className="scale-75 origin-left"
+          />
+          <V0StatusCard
+            title="State"
+            value={currentDocument.state}
+            variant={currentDocument.state === 'draft' ? 'warning' : 'success'}
+            className="scale-75 origin-left"
+          />
           {showSuggestion && (
-            <span className="text-purple-600 font-medium">✨ AI Ready</span>
+            <V0StatusCard
+              title="AI"
+              value="Ready"
+              icon={<Sparkles className="w-3 h-3" />}
+              variant="success"
+              className="scale-75 origin-left"
+            />
           )}
         </div>
       </div>

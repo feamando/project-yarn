@@ -117,17 +117,17 @@ export const DialogEnhanced: React.FC<DialogProps> = ({
       <div 
         ref={dialogRef}
         className={`
-          bg-background border border-border rounded-lg shadow-lg 
+          bg-v0-dark-bg border border-v0-border-primary rounded-lg shadow-lg 
           ${sizeClasses[size]} w-full max-h-[90vh] overflow-auto
           ${className}
         `}
       >
         {/* Dialog Header */}
-        <div className="flex items-center justify-between p-6 border-b border-border">
+        <div className="flex items-center justify-between p-6 border-b border-v0-border-primary">
           <div>
             <h2 
               id="dialog-title" 
-              className="text-lg font-semibold text-foreground"
+              className="text-lg font-semibold text-v0-text-primary"
             >
               {title}
             </h2>

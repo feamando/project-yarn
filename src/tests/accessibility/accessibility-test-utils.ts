@@ -1,6 +1,7 @@
-// Accessibility Test Utilities
-// Task 3.3.3: Accessibility Audit Implementation
+// Comprehensive Accessibility Test Utilities
+// Task 6.1: Add automated accessibility testing to test suite
 
+import React from 'react'
 import { render, RenderResult } from '@testing-library/react'
 import { axe, toHaveNoViolations } from 'jest-axe'
 import userEvent from '@testing-library/user-event'
@@ -94,8 +95,6 @@ export function testColorContrast(
     expect(element).toBeInTheDocument()
     
     const styles = window.getComputedStyle(element)
-    const backgroundColor = styles.backgroundColor
-    const color = styles.color
     const fontSize = parseFloat(styles.fontSize)
     
     // Calculate contrast ratio (simplified - in real implementation would use proper algorithm)
@@ -113,8 +112,7 @@ export function testColorContrast(
 export async function testModalFocusManagement(
   renderResult: RenderResult,
   modalTriggerSelector: string,
-  modalSelector: string,
-  closeButtonSelector: string
+  modalSelector: string
 ): Promise<void> {
   const user = userEvent.setup()
   

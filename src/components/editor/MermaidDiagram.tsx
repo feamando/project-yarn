@@ -15,34 +15,11 @@ interface MermaidDiagramProps {
   diagramType?: string;
 }
 
-// Generate accessible alt text for Mermaid diagrams
-const generateAltText = (code: string, diagramType?: string): string => {
-  if (diagramType) {
-    return `${diagramType} diagram: ${code.split('\n')[0] || 'Interactive diagram'}`;
-  }
-  
-  // Auto-detect diagram type from code
-  const firstLine = code.trim().split('\n')[0].toLowerCase();
-  if (firstLine.includes('flowchart') || firstLine.includes('graph')) {
-    return `Flowchart diagram: ${code.split('\n')[0] || 'Process flow visualization'}`;
-  } else if (firstLine.includes('sequencediagram')) {
-    return `Sequence diagram: ${code.split('\n')[0] || 'Interaction sequence visualization'}`;
-  } else if (firstLine.includes('classDiagram')) {
-    return `Class diagram: ${code.split('\n')[0] || 'Class relationship visualization'}`;
-  } else if (firstLine.includes('gantt')) {
-    return `Gantt chart: ${code.split('\n')[0] || 'Project timeline visualization'}`;
-  } else if (firstLine.includes('pie')) {
-    return `Pie chart: ${code.split('\n')[0] || 'Data distribution visualization'}`;
-  } else {
-    return `Interactive diagram: ${code.split('\n')[0] || 'Visual diagram representation'}`;
-  }
-};
+
 
 export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({
   code,
   className = '',
-  altText,
-  diagramType,
 }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -128,9 +105,9 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({
               height: auto;
             }
             .error {
-              color: #ef4444;
-              background: #fef2f2;
-              border: 1px solid #fecaca;
+              color: var(--v0-red);
+              background: var(--v0-red-bg);
+              border: 1px solid var(--v0-red-border);
               border-radius: 6px;
               padding: 12px;
               font-size: 14px;
@@ -264,9 +241,9 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({
   };
 
   return (
-    <div className={`mermaid-diagram-container border rounded-lg bg-background ${className}`}>
+    <div className={`mermaid-diagram-container border rounded-lg bg-v0-dark-bg ${className}`}>
       {/* Diagram Header */}
-      <div className="flex items-center justify-between p-3 border-b bg-muted/30">
+      <div className="flex items-center justify-between p-3 border-b bg-v0-bg-secondary/30">
         <div className="flex items-center space-x-2">
           <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
           <span className="text-sm font-medium text-muted-foreground">Mermaid Diagram</span>
@@ -344,10 +321,10 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({
 
       {/* Diagram Code (collapsible) */}
       <details className="border-t">
-        <summary className="p-3 cursor-pointer text-sm text-muted-foreground hover:bg-muted/50">
+        <summary className="p-3 cursor-pointer text-sm text-muted-foreground hover:bg-v0-bg-secondary/50">
           View Source Code
         </summary>
-        <div className="p-3 bg-muted/20">
+        <div className="p-3 bg-v0-bg-secondary/20">
           <pre className="text-xs font-mono whitespace-pre-wrap break-words">
             <code>{code}</code>
           </pre>

@@ -8,8 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { V0FormField, V0Header } from "@/components/v0-components/composition-patterns";
+import { ContextIndicator } from "@/components/context-indicator";
 import { 
-  Settings, 
   Key, 
   CheckCircle, 
   XCircle, 
@@ -235,7 +236,7 @@ export function AISettings() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'configured':
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
+        return <CheckCircle className="h-4 w-4 text-v0-teal" />;
       case 'validating':
         return <AlertCircle className="h-4 w-4 text-yellow-500 animate-spin" />;
       case 'error':
@@ -246,18 +247,17 @@ export function AISettings() {
   };
 
   return (
-    <div className="h-full overflow-auto p-6 bg-background">
+    <div className="h-full overflow-auto p-6 bg-v0-dark-bg">
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex items-center space-x-3">
-          <Settings className="h-6 w-6 text-primary" />
-          <div>
-            <h1 className="text-2xl font-semibold">AI Settings</h1>
-            <p className="text-sm text-muted-foreground">
+        <V0Header
+          title="AI Settings"
+          actions={
+            <div className="text-sm text-v0-text-muted">
               Configure your AI providers and manage credentials
-            </p>
-          </div>
-        </div>
+            </div>
+          }
+        />
 
         {/* Active Provider Section */}
         <Card>
@@ -278,7 +278,7 @@ export function AISettings() {
                   className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition-colors ${
                     activeProvider === provider.id
                       ? 'border-primary bg-primary/5'
-                      : 'border-border hover:bg-muted/50'
+                      : 'border-v0-border-primary hover:bg-v0-border-primary/50'
                   }`}
                   onClick={() => selectProvider(provider.id)}
                 >
@@ -322,18 +322,24 @@ export function AISettings() {
               {/* AWS Bedrock Tab */}
               <TabsContent value="bedrock" className="space-y-4">
                 <div className="space-y-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Access Key ID</label>
+                  <V0FormField
+                    label="Access Key ID"
+                    required={true}
+                    description="Your AWS access key identifier (starts with AKIA)"
+                  >
                     <Input
                       type="text"
                       placeholder="AKIA..."
                       value={bedrockCredentials.access_key_id}
                       onChange={(e) => handleBedrockCredentialsChange('access_key_id', e.target.value)}
                     />
-                  </div>
+                  </V0FormField>
                   
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Secret Access Key</label>
+                  <V0FormField
+                    label="Secret Access Key"
+                    required={true}
+                    description="Your AWS secret access key (keep this secure)"
+                  >
                     <div className="relative">
                       <Input
                         type={showBedrockSecret ? "text" : "password"}
@@ -352,17 +358,20 @@ export function AISettings() {
                         {showBedrockSecret ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </Button>
                     </div>
-                  </div>
+                  </V0FormField>
                   
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Region</label>
+                  <V0FormField
+                    label="Region"
+                    required={true}
+                    description="AWS region for Bedrock service (e.g., us-east-1)"
+                  >
                     <Input
                       type="text"
                       placeholder="us-east-1"
                       value={bedrockCredentials.region}
                       onChange={(e) => handleBedrockCredentialsChange('region', e.target.value)}
                     />
-                  </div>
+                  </V0FormField>
 
                   <div className="flex space-x-2">
                     <Button onClick={saveBedrock} variant="outline">
@@ -376,10 +385,26 @@ export function AISettings() {
                     </Button>
                   </div>
 
+                  {/* Bedrock Validation Progress */}
+                  {isValidatingBedrock && (
+                    <div className="py-2">
+                      <ContextIndicator 
+                        isProcessing={isValidatingBedrock}
+                        processedItems={50}
+                        totalItems={100}
+                        phase="processing"
+                        ariaLabel="Validating AWS Bedrock credentials"
+                      />
+                      <div className="text-xs text-gray-500 mt-1 text-center">
+                        Testing AWS Bedrock connection...
+                      </div>
+                    </div>
+                  )}
+
                   {bedrockValidationResult && (
-                    <Alert className={bedrockValidationResult.success ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}>
+                    <Alert className={bedrockValidationResult.success ? 'border-v0-teal/20 bg-v0-teal/10' : 'border-red-200 bg-red-50'}>
                       <AlertCircle className="h-4 w-4" />
-                      <AlertDescription className={bedrockValidationResult.success ? 'text-green-800' : 'text-red-800'}>
+                      <AlertDescription className={bedrockValidationResult.success ? 'text-v0-teal' : 'text-red-800'}>
                         {bedrockValidationResult.message}
                       </AlertDescription>
                     </Alert>
@@ -390,8 +415,11 @@ export function AISettings() {
               {/* Google Gemini Tab */}
               <TabsContent value="gemini" className="space-y-4">
                 <div className="space-y-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">API Key</label>
+                  <V0FormField
+                    label="API Key"
+                    required={true}
+                    description="Your Google Gemini API key (keep this secure)"
+                  >
                     <div className="relative">
                       <Input
                         type={showGeminiKey ? "text" : "password"}
@@ -410,7 +438,7 @@ export function AISettings() {
                         {showGeminiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </Button>
                     </div>
-                  </div>
+                  </V0FormField>
 
                   <div className="flex space-x-2">
                     <Button onClick={saveGemini} variant="outline">
@@ -424,10 +452,26 @@ export function AISettings() {
                     </Button>
                   </div>
 
+                  {/* Gemini Validation Progress */}
+                  {isValidatingGemini && (
+                    <div className="py-2">
+                      <ContextIndicator 
+                        isProcessing={isValidatingGemini}
+                        processedItems={50}
+                        totalItems={100}
+                        phase="processing"
+                        ariaLabel="Validating Google Gemini credentials"
+                      />
+                      <div className="text-xs text-gray-500 mt-1 text-center">
+                        Testing Google Gemini connection...
+                      </div>
+                    </div>
+                  )}
+
                   {geminiValidationResult && (
-                    <Alert className={geminiValidationResult.success ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}>
+                    <Alert className={geminiValidationResult.success ? 'border-v0-teal/20 bg-v0-teal/10' : 'border-red-200 bg-red-50'}>
                       <AlertCircle className="h-4 w-4" />
-                      <AlertDescription className={geminiValidationResult.success ? 'text-green-800' : 'text-red-800'}>
+                      <AlertDescription className={geminiValidationResult.success ? 'text-v0-teal' : 'text-red-800'}>
                         {geminiValidationResult.message}
                       </AlertDescription>
                     </Alert>

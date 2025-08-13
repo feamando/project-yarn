@@ -1,13 +1,12 @@
 // UI Components Accessibility Tests
 // Task 3.3.3: Accessibility Audit Implementation
 
-import React from 'react'
+
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { 
   runComprehensiveAccessibilityTest,
-  AccessibilityAuditReport,
-  type AccessibilityIssue
+  AccessibilityAuditReport
 } from './accessibility-test-utils'
 
 // Import UI components
@@ -128,7 +127,7 @@ describe('UI Components Accessibility Tests', () => {
         </div>
       )
 
-      const { container } = render(<InputWithError />)
+      render(<InputWithError />)
       
       const input = screen.getByLabelText('Email')
       const errorMessage = screen.getByRole('alert')

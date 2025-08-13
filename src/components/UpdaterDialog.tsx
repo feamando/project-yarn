@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { UpdaterService, UpdateStatus, UpdateInfo } from '../services/updaterService';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from './ui/dialog';
+import { UpdaterService, UpdateStatus } from '../services/updaterService';
+import { Dialog, DialogContent, DialogFooter } from './ui/dialog';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Alert, AlertDescription } from './ui/alert';
+import { YarnLogo } from '@/components/yarn-logo';
+import { V0ModalHeader } from '@/components/v0-components/composition-patterns';
 import { Loader2, Download, RefreshCw, AlertCircle, CheckCircle } from 'lucide-react';
 
 interface UpdaterDialogProps {
@@ -78,7 +80,7 @@ export const UpdaterDialog: React.FC<UpdaterDialogProps> = ({
       .split('\n')
       .map((line, index) => {
         if (line.startsWith('## ')) {
-          return <h3 key={index} className="font-semibold text-lg mt-4 mb-2">{line.slice(3)}</h3>;
+          return <h3 key={index} className="font-serif font-semibold text-xl mt-4 mb-2">{line.slice(3)}</h3>;
         }
         if (line.startsWith('- ')) {
           return <li key={index} className="ml-4">{line.slice(2)}</li>;
@@ -97,18 +99,18 @@ export const UpdaterDialog: React.FC<UpdaterDialogProps> = ({
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Download className="h-5 w-5" />
-            {updateStatus.available ? 'Update Available' : 'No Updates Available'}
-          </DialogTitle>
-          <DialogDescription>
-            {updateStatus.available 
+        <V0ModalHeader
+          title={updateStatus.available ? 'Update Available' : 'No Updates Available'}
+          description={
+            updateStatus.available 
               ? `A new version of Project Yarn is available.`
               : 'You are running the latest version of Project Yarn.'
-            }
-          </DialogDescription>
-        </DialogHeader>
+          }
+          icon={<YarnLogo className="w-5 h-5" />}
+          badge={updateStatus.available && updateStatus.latest_version ? (
+            <Badge variant="default" className="ml-2">{updateStatus.latest_version}</Badge>
+          ) : undefined}
+        />
 
         <div className="space-y-4">
           {/* Version Information */}
@@ -129,8 +131,8 @@ export const UpdaterDialog: React.FC<UpdaterDialogProps> = ({
           {updateStatus.available && updateStatus.update_info && (
             <div className="space-y-3">
               <div>
-                <h4 className="font-medium mb-2">What's New</h4>
-                <div className="bg-muted p-3 rounded-md max-h-48 overflow-y-auto text-sm">
+                <h4 className="text-lg font-serif font-medium mb-2">What's New</h4>
+                <div className="bg-v0-bg-secondary p-3 rounded-md max-h-48 overflow-y-auto text-sm">
                   {formatReleaseNotes(updateStatus.update_info.body)}
                 </div>
               </div>
@@ -156,8 +158,8 @@ export const UpdaterDialog: React.FC<UpdaterDialogProps> = ({
           {/* Installation Success */}
           {installSuccess && (
             <Alert>
-              <CheckCircle className="h-4 w-4 text-green-600" />
-              <AlertDescription className="text-green-600">
+              <CheckCircle className="h-4 w-4 text-v0-teal" />
+              <AlertDescription className="text-v0-teal">
                 Update installed successfully! Please restart the application to complete the update.
               </AlertDescription>
             </Alert>

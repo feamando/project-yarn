@@ -1,10 +1,13 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import * as React from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { V0ModalHeader } from "@/components/v0-components/composition-patterns";
+import { YarnLogo } from "@/components/yarn-logo";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { DocumentTransformationUI } from "./DocumentTransformationUI";
+
 import { 
   Command, 
   Search, 
@@ -236,12 +239,13 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[80vh] p-0">
-        <DialogHeader className="p-4 pb-2">
-          <DialogTitle className="flex items-center space-x-2">
-            <Command className="h-5 w-5" />
-            <span>Command Palette</span>
-          </DialogTitle>
-        </DialogHeader>
+        <div className="p-4 pb-2">
+          <V0ModalHeader
+            title="Command Palette"
+            description="Search and execute commands quickly"
+            icon={<YarnLogo className="w-5 h-5" />}
+          />
+        </div>
 
         {/* Search Input */}
         <div className="px-4 pb-2">
@@ -273,7 +277,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                     {categoryNames[category as keyof typeof categoryNames]}
                   </h3>
                   <div className="space-y-1">
-                    {categoryCommands.map((command, index) => {
+                    {categoryCommands.map((command, _) => {
                       const globalIndex = filteredCommands.indexOf(command);
                       const isSelected = globalIndex === selectedIndex;
                       
@@ -316,7 +320,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         </ScrollArea>
 
         {/* Footer */}
-        <div className="px-4 py-2 border-t bg-muted/30">
+        <div className="px-4 py-2 border-t bg-v0-bg-secondary/30">
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>Use ↑↓ to navigate, Enter to select, Esc to close</span>
             <span>{filteredCommands.length} commands</span>

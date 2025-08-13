@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import * as React from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { invoke } from '@tauri-apps/api/tauri';
 import { listen, UnlistenFn } from '@tauri-apps/api/event';
 import { Button } from "@/components/ui/button";
@@ -7,11 +8,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { LiveRegion, useLiveRegion } from "@/components/ui/live-region";
+import { V0AIProcessingPanel } from "@/components/v0-components/composition-patterns";
+import { ContextIndicator } from "@/components/context-indicator";
 import { 
   Send, 
   User, 
   Bot, 
-  Loader2, 
   AlertCircle,
   Copy,
   Check,
@@ -153,7 +155,7 @@ export const StreamingChatUI: React.FC = () => {
         include_context: true // Enable context retrieval
       };
 
-      const response = await invoke<ChatResponse>('send_chat_message', request);
+      const response = await invoke<ChatResponse>('send_chat_message', request as any);
 
       if (!response.success) {
         throw new Error(response.message || 'Failed to send message');
@@ -223,12 +225,21 @@ export const StreamingChatUI: React.FC = () => {
       return <AlertCircle className="h-4 w-4 text-destructive" />;
     }
     if (isStreaming) {
-      return <Loader2 className="h-4 w-4 animate-spin text-primary" />;
+      return (
+        <V0AIProcessingPanel
+          isProcessing={true}
+          processedItems={0}
+          totalItems={1}
+          title="AI"
+          status="active"
+          className="scale-75 origin-left"
+        />
+      );
     }
     if (role === 'user') {
       return <User className="h-4 w-4 text-blue-500" />;
     }
-    return <Bot className="h-4 w-4 text-green-500" />;
+    return <Bot className="h-4 w-4 text-v0-teal" />;
   };
 
   // Format timestamp
@@ -239,10 +250,17 @@ export const StreamingChatUI: React.FC = () => {
   return (
     <div className="flex flex-col h-full">
       {/* Chat Header */}
-      <div className="flex items-center justify-between p-3 border-b border-border">
+      <div className="flex items-center justify-between p-v0-space-3 border-b border-v0-border-primary">
         <div className="flex items-center space-x-2">
           <Bot className="h-4 w-4 text-primary" />
           <span className="font-medium text-sm">AI Chat</span>
+          <ContextIndicator 
+            isProcessing={isLoading || !!currentStreamingId}
+            processedItems={messages.filter(m => m.role === 'assistant' && m.content).length}
+            totalItems={messages.filter(m => m.role === 'user').length}
+            phase={isLoading || currentStreamingId ? 'processing' : 'idle'}
+            ariaLabel={`Chat status: ${messages.length} messages`}
+          />
         </div>
         <div className="flex items-center space-x-1">
           {messages.length > 0 && (
@@ -272,9 +290,33 @@ export const StreamingChatUI: React.FC = () => {
         </div>
       </div>
 
+      {/* AI Processing Panel - Show during AI processing */}
+      {(isLoading || currentStreamingId) && (
+        <div className="p-v0-space-3 border-b border-v0-border-primary">
+          <V0AIProcessingPanel 
+            isProcessing={isLoading || !!currentStreamingId}
+            processedItems={currentStreamingId ? 
+              Math.min(messages.find(m => m.id === currentStreamingId)?.content?.length || 0, 1000) : 
+              messages.filter(m => m.role === 'assistant' && m.content).length * 100}
+            totalItems={currentStreamingId ? 1000 : 
+              (messages.filter(m => m.role === 'user').length + messages.filter(m => m.role === 'assistant').length) * 100}
+            title="AI Chat Assistant"
+            status={isLoading || currentStreamingId ? 'active' : 'completed'}
+            onStop={() => {
+              if (currentStreamingId) {
+                // Stop current streaming
+                setCurrentStreamingId(null);
+              }
+              setIsLoading(false);
+            }}
+            className="mb-0"
+          />
+        </div>
+      )}
+
       {/* Error Alert */}
       {error && (
-        <div className="p-3">
+        <div className="p-v0-space-3">
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription className="text-xs">
@@ -286,12 +328,12 @@ export const StreamingChatUI: React.FC = () => {
 
       {/* Messages Area */}
       <ScrollArea className="flex-1 p-3">
-        <div className="space-y-4">
+        <div className="space-y-4" role="log" aria-label="Chat conversation" aria-live="polite">
           {messages.length === 0 ? (
             <div className="text-center text-muted-foreground py-8">
-              <Bot className="h-8 w-8 mx-auto mb-2 opacity-50" />
+              <Bot className="h-8 w-8 mx-auto mb-v0-space-2 opacity-50" />
               <p className="text-sm">Start a conversation with your AI assistant</p>
-              <p className="text-xs mt-1">Type a message below to begin</p>
+              <p className="text-xs mt-v0-space-1">Type a message below to begin</p>
             </div>
           ) : (
             messages.map((message) => (
@@ -310,7 +352,7 @@ export const StreamingChatUI: React.FC = () => {
                       ? 'bg-primary text-primary-foreground' 
                       : message.error 
                         ? 'bg-destructive/10 border-destructive/20' 
-                        : 'bg-muted'
+                        : 'bg-v0-bg-secondary'
                   }`}>
                     <CardContent className="p-3">
                       <div className="text-sm whitespace-pre-wrap">
@@ -319,7 +361,7 @@ export const StreamingChatUI: React.FC = () => {
                       
                       {/* Message Actions */}
                       {message.content && !message.isStreaming && (
-                        <div className="flex items-center justify-between mt-2 pt-2 border-t border-border/50">
+                        <div className="flex items-center justify-between mt-2 pt-2 border-t border-v0-border-primary/50">
                           <span className="text-xs text-muted-foreground">
                             {formatTime(message.timestamp)}
                           </span>
@@ -329,9 +371,10 @@ export const StreamingChatUI: React.FC = () => {
                             onClick={() => copyMessage(message.content, message.id)}
                             className="h-5 w-5 p-0"
                             title="Copy message"
+                            aria-label={copiedMessageId === message.id ? "Message copied" : "Copy message to clipboard"}
                           >
                             {copiedMessageId === message.id ? (
-                              <Check className="h-3 w-3 text-green-500" />
+                              <Check className="h-3 w-3 text-v0-teal" />
                             ) : (
                               <Copy className="h-3 w-3" />
                             )}
@@ -355,7 +398,7 @@ export const StreamingChatUI: React.FC = () => {
       </ScrollArea>
 
       {/* Input Area */}
-      <div className="p-3 border-t border-border">
+      <div className="p-3 border-t border-v0-border-primary">
         <div className="flex items-center space-x-2">
           <Input
             value={inputMessage}
@@ -372,7 +415,14 @@ export const StreamingChatUI: React.FC = () => {
             className="px-3"
           >
             {isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <V0AIProcessingPanel
+                isProcessing={true}
+                processedItems={0}
+                totalItems={1}
+                title=""
+                status="active"
+                className="scale-50 origin-center"
+              />
             ) : (
               <Send className="h-4 w-4" />
             )}

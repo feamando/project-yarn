@@ -3,8 +3,8 @@ import { FixedSizeList as List } from 'react-window';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAppStore, useCurrentDocument } from '@/stores/useAppStore';
-import { FileText, Save, Eye, Edit3, Sparkles, Loader2 } from 'lucide-react';
-import { invoke } from '@tauri-apps/api/tauri';
+import { FileText, Save, Eye, Edit3, Sparkles } from 'lucide-react';
+
 
 /**
  * Virtualized Markdown Editor Component
@@ -60,9 +60,9 @@ const LineItem: React.FC<LineItemProps> = ({ index, style, data }) => {
   const isSelected = selectedLine === index;
 
   return (
-    <div style={style} className="flex items-start border-b border-border/30">
+    <div style={style} className="flex items-start border-b border-v0-border-primary/30">
       {/* Line number gutter */}
-      <div className="w-12 flex-shrink-0 text-right pr-3 py-2 text-xs text-muted-foreground bg-muted/20 border-r border-border/30">
+      <div className="w-12 flex-shrink-0 text-right pr-3 py-2 text-xs text-muted-foreground bg-v0-bg-secondary/20 border-r border-v0-border-primary/30">
         {line.lineNumber}
       </div>
       
@@ -74,11 +74,11 @@ const LineItem: React.FC<LineItemProps> = ({ index, style, data }) => {
           onChange={handleChange}
           onFocus={handleFocus}
           className={`
-            w-full resize-none border-0 outline-none bg-transparent text-foreground
+            w-full resize-none border-0 outline-none bg-transparent text-v0-text-primary
             px-4 py-2 font-mono leading-relaxed min-h-[2.5rem]
             ${fontSize === 'sm' ? 'text-sm' : fontSize === 'lg' ? 'text-lg' : 'text-base'}
             ${wordWrap ? 'whitespace-pre-wrap' : 'whitespace-pre'}
-            ${isSelected ? 'bg-primary/5' : 'hover:bg-muted/20'}
+            ${isSelected ? 'bg-primary/5' : 'hover:bg-v0-bg-secondary/20'}
             placeholder:text-muted-foreground
             focus:ring-0 focus:outline-none focus:bg-primary/10
             transition-colors duration-150
@@ -119,7 +119,7 @@ export const VirtualizedMarkdownEditor: React.FC<VirtualizedMarkdownEditorProps>
   
   // AI Autocomplete state
   const [aiSuggestion, setAiSuggestion] = useState('');
-  const [isLoadingSuggestion, setIsLoadingSuggestion] = useState(false);
+
   const [showSuggestion, setShowSuggestion] = useState(false);
   
   // Virtualization state
@@ -157,7 +157,7 @@ export const VirtualizedMarkdownEditor: React.FC<VirtualizedMarkdownEditorProps>
     if (currentDocument) {
       setContent(currentDocument.content || '');
       setHasUnsavedChanges(false);
-      setLastSaved(currentDocument.updated_at ? new Date(currentDocument.updated_at) : null);
+      setLastSaved(currentDocument.updatedAt ? new Date(currentDocument.updatedAt) : null);
     }
   }, [currentDocument]);
 
@@ -203,27 +203,6 @@ export const VirtualizedMarkdownEditor: React.FC<VirtualizedMarkdownEditorProps>
   }, [currentDocument, content, hasUnsavedChanges]);
 
   // AI Autocomplete functions
-  const getAiSuggestion = useCallback(async (context: string) => {
-    if (!context.trim()) return;
-
-    setIsLoadingSuggestion(true);
-    try {
-      const suggestion = await invoke<string>('get_autocomplete', {
-        context: context,
-        maxTokens: 50
-      });
-      
-      if (suggestion && suggestion.trim()) {
-        setAiSuggestion(suggestion.trim());
-        setShowSuggestion(true);
-      }
-    } catch (error) {
-      console.error('Failed to get AI suggestion:', error);
-    } finally {
-      setIsLoadingSuggestion(false);
-    }
-  }, []);
-
   const acceptSuggestion = useCallback(() => {
     if (!aiSuggestion) return;
     
@@ -283,7 +262,7 @@ export const VirtualizedMarkdownEditor: React.FC<VirtualizedMarkdownEditorProps>
       <div className={`h-full flex items-center justify-center ${className}`}>
         <Card className="max-w-md">
           <CardHeader className="text-center">
-            <div className="mx-auto w-12 h-12 bg-muted rounded-lg flex items-center justify-center mb-4">
+            <div className="mx-auto w-12 h-12 bg-v0-bg-secondary rounded-lg flex items-center justify-center mb-4">
               <FileText className="h-6 w-6 text-muted-foreground" />
             </div>
             <CardTitle className="text-lg">No Document Selected</CardTitle>
@@ -305,7 +284,7 @@ export const VirtualizedMarkdownEditor: React.FC<VirtualizedMarkdownEditorProps>
   return (
     <div className={`h-full flex flex-col ${className}`}>
       {/* Editor Header */}
-      <div className="flex items-center justify-between p-4 border-b border-border bg-muted/20">
+      <div className="flex items-center justify-between p-4 border-b border-v0-border-primary bg-v0-bg-secondary/20">
         <div className="flex items-center space-x-3">
           <FileText className="h-4 w-4 text-primary" />
           <div>
@@ -313,7 +292,7 @@ export const VirtualizedMarkdownEditor: React.FC<VirtualizedMarkdownEditorProps>
             <p className="text-xs text-muted-foreground">
               {currentDocument.state} • {lastSaved ? `Saved ${lastSaved.toLocaleTimeString()}` : 'Unsaved'}
               {lines.length > 100 && (
-                <span className="ml-2 px-2 py-0.5 bg-green-100 text-green-800 rounded text-xs">
+                <span className="ml-2 px-2 py-0.5 bg-v0-teal/10 text-v0-teal rounded text-xs">
                   Virtualized ({performanceMetrics.virtualizationRatio.toFixed(1)}% rendered)
                 </span>
               )}
@@ -322,13 +301,7 @@ export const VirtualizedMarkdownEditor: React.FC<VirtualizedMarkdownEditorProps>
         </div>
         
         <div className="flex items-center space-x-2">
-          {/* AI Status Indicator */}
-          {isLoadingSuggestion && (
-            <div className="flex items-center space-x-2 text-xs text-blue-600">
-              <Loader2 className="w-3 h-3 animate-spin" />
-              <span>AI thinking...</span>
-            </div>
-          )}
+
           
           {showSuggestion && aiSuggestion && (
             <div className="flex items-center space-x-2 text-xs text-purple-600">
@@ -362,10 +335,11 @@ export const VirtualizedMarkdownEditor: React.FC<VirtualizedMarkdownEditorProps>
       </div>
 
       {/* Virtualized Editor Area */}
-      <div ref={containerRef} className="flex-1 flex relative bg-background">
+      <div ref={containerRef} className="flex-1 flex relative bg-v0-dark-bg">
         <List
           ref={listRef}
           height={containerHeight}
+          width="100%"
           itemCount={lines.length || 1}
           itemSize={40}
           itemData={{
@@ -383,7 +357,7 @@ export const VirtualizedMarkdownEditor: React.FC<VirtualizedMarkdownEditorProps>
         
         {/* AI Suggestion Overlay */}
         {showSuggestion && aiSuggestion && (
-          <div className="absolute top-4 right-4 max-w-sm bg-card border border-border rounded-lg shadow-lg p-4 z-10">
+          <div className="absolute top-4 right-4 max-w-sm bg-card border border-v0-border-primary rounded-lg shadow-lg p-4 z-10">
             <div className="flex items-start justify-between space-x-2 mb-2">
               <div className="flex items-center space-x-2">
                 <Sparkles className="w-4 h-4 text-purple-500" />
@@ -391,13 +365,13 @@ export const VirtualizedMarkdownEditor: React.FC<VirtualizedMarkdownEditorProps>
               </div>
               <button
                 onClick={dismissSuggestion}
-                className="text-muted-foreground hover:text-foreground transition-colors"
+                className="text-muted-foreground hover:text-v0-text-primary transition-colors"
               >
                 ×
               </button>
             </div>
             
-            <div className="text-sm text-muted-foreground mb-3 bg-muted/50 p-2 rounded border-l-2 border-purple-500">
+            <div className="text-sm text-muted-foreground mb-3 bg-v0-bg-secondary/50 p-2 rounded border-l-2 border-purple-500">
               {aiSuggestion}
             </div>
             
@@ -427,23 +401,18 @@ export const VirtualizedMarkdownEditor: React.FC<VirtualizedMarkdownEditorProps>
       </div>
 
       {/* Editor Footer/Stats */}
-      <div className="flex items-center justify-between p-3 text-xs text-muted-foreground border-t border-border bg-muted/10">
+      <div className="flex items-center justify-between p-3 text-xs text-muted-foreground border-t border-v0-border-primary bg-v0-bg-secondary/10">
         <div className="flex items-center space-x-4">
           <span>Line {selectedLine + 1} of {lines.length}</span>
           <span>UTF-8</span>
           <span>Markdown</span>
           {lines.length > 100 && (
-            <span className="flex items-center space-x-1 text-green-600">
+            <span className="flex items-center space-x-1 text-v0-teal">
               <span>⚡</span>
               <span>Virtualized ({performanceMetrics.visibleLines}/{performanceMetrics.totalLines} lines)</span>
             </span>
           )}
-          {isLoadingSuggestion && (
-            <span className="flex items-center space-x-1 text-blue-600">
-              <Loader2 className="w-3 h-3 animate-spin" />
-              <span>AI</span>
-            </span>
-          )}
+
         </div>
         
         <div className="flex items-center space-x-4">

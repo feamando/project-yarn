@@ -4,7 +4,7 @@
 // Modal dialog for collecting variable values when using AI Blocks
 
 import React, { useState, useEffect } from 'react';
-import { useAiBlocksStore, AiBlock, AiBlockVariable } from '../../stores/useAiBlocksStore';
+import { useAiBlocksStore, AiBlock } from '../../stores/useAiBlocksStore';
 import {
   Dialog,
   DialogContent,
@@ -70,7 +70,7 @@ export const VariableInputModal: React.FC<VariableInputModalProps> = ({
 
     try {
       const result = await processTemplate(aiBlock.id, variableValues);
-      setProcessedPrompt(result);
+      setProcessedPrompt(result.processed_prompt);
     } catch (error) {
       console.error('Failed to process template:', error);
       setProcessedPrompt(aiBlock.prompt_template);
@@ -100,7 +100,7 @@ export const VariableInputModal: React.FC<VariableInputModalProps> = ({
 
     try {
       const result = await processTemplate(aiBlock.id, variableValues);
-      onUse(result);
+      onUse(result.processed_prompt);
       onClose();
     } catch (error) {
       console.error('Failed to process template:', error);
@@ -197,7 +197,7 @@ export const VariableInputModal: React.FC<VariableInputModalProps> = ({
                 <div key={index} className="space-y-2">
                   <Label htmlFor={variable.name} className="flex items-center">
                     {variable.name}
-                    {variable.required && <span className="text-red-500 ml-1">*</span>}
+                    {variable.required && <span className="text-v0-red ml-1">*</span>}
                     {variable.description && (
                       <span className="text-sm text-muted-foreground ml-2">
                         - {variable.description}
@@ -249,7 +249,7 @@ export const VariableInputModal: React.FC<VariableInputModalProps> = ({
                 <CardTitle className="text-base">Preview</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="bg-muted/30 p-3 rounded text-sm font-mono whitespace-pre-wrap max-h-40 overflow-y-auto">
+                <div className="bg-v0-border-primary/30 p-3 rounded text-sm font-mono whitespace-pre-wrap max-h-40 overflow-y-auto">
                   {processedPrompt}
                 </div>
               </CardContent>

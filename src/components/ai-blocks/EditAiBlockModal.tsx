@@ -169,6 +169,7 @@ export const EditAiBlockModal: React.FC<EditAiBlockModalProps> = ({
           ...prev.variables,
           {
             name: variable,
+            var_type: 'text', // Default to text type
             description: variableInput.description.trim(),
             required: variableInput.required,
             default_value: variableInput.default_value.trim() || undefined,
@@ -395,12 +396,12 @@ export const EditAiBlockModal: React.FC<EditAiBlockModalProps> = ({
               {formData.variables.length > 0 && (
                 <div className="space-y-2">
                   {formData.variables.map((variable, index) => (
-                    <div key={index} className="flex items-center justify-between p-2 bg-muted rounded">
+                    <div key={index} className="flex items-center justify-between p-2 bg-v0-border-primary rounded">
                       <div className="flex-1">
                         <div className="flex items-center space-x-2">
                           <Badge variant="outline">
                             {variable.name}
-                            {variable.required && <span className="text-red-500 ml-1">*</span>}
+                            {variable.required && <span className="text-v0-red ml-1">*</span>}
                           </Badge>
                           {variable.description && (
                             <span className="text-sm text-muted-foreground">

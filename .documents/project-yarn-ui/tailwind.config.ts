@@ -1,11 +1,13 @@
-/** @type {import('tailwindcss').Config} */
-export default {
+import type { Config } from "tailwindcss"
+
+const config: Config = {
   darkMode: ["class"],
   content: [
-    './pages/**/*.{ts,tsx}',
-    './components/**/*.{ts,tsx}',
-    './app/**/*.{ts,tsx}',
-    './src/**/*.{ts,tsx}',
+    "./pages/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
+    "*.{js,ts,jsx,tsx,mdx}",
   ],
   prefix: "",
   theme: {
@@ -18,6 +20,17 @@ export default {
     },
     extend: {
       colors: {
+        // Project Yarn color scheme
+        "yarn-bg": "#1E1E1E",
+        "yarn-bg-secondary": "#252526",
+        "yarn-bg-tertiary": "#2D2D30",
+        "yarn-border": "#3E3E42",
+        "yarn-text": "#D4D4D4",
+        "yarn-text-muted": "#858585",
+        "yarn-gold": "#FFD700",
+        "yarn-gold-hover": "#E6C200",
+        "yarn-red": "#FF4136",
+        "yarn-green": "#4EC9B0",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -71,7 +84,14 @@ export default {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },
+      fontFamily: {
+        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
+        serif: ["var(--font-crimson)", "Georgia", "serif"],
+        mono: ["Google Sans Code", "Menlo", "Monaco", "monospace"],
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],
-}
+} satisfies Config
+
+export default config

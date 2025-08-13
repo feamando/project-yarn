@@ -53,7 +53,7 @@ export const AiBlockStats: React.FC = () => {
   const getCategoryColor = (category: string) => {
     const colors: Record<string, string> = {
       productivity: 'bg-blue-500',
-      development: 'bg-green-500',
+      development: 'bg-v0-teal',
       creativity: 'bg-purple-500',
       education: 'bg-yellow-500',
       writing: 'bg-pink-500',
@@ -74,11 +74,11 @@ export const AiBlockStats: React.FC = () => {
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="grid grid-cols-2 gap-3">
-            <div className="text-center p-2 bg-muted/30 rounded">
+            <div className="text-center p-2 bg-v0-border-primary/30 rounded">
               <div className="text-2xl font-bold text-primary">{totalBlocks}</div>
               <div className="text-xs text-muted-foreground">Total Blocks</div>
             </div>
-            <div className="text-center p-2 bg-muted/30 rounded">
+            <div className="text-center p-2 bg-v0-border-primary/30 rounded">
               <div className="text-2xl font-bold text-orange-600">{totalUsage}</div>
               <div className="text-xs text-muted-foreground">Total Uses</div>
             </div>

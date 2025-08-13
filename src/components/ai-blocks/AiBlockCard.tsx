@@ -51,19 +51,19 @@ export const AiBlockCard: React.FC<AiBlockCardProps> = ({
 
   const getCategoryColor = (category: string) => {
     const colors: Record<string, string> = {
-      productivity: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
-      development: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
-      creativity: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
-      education: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
-      writing: 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-300',
-      general: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300',
+      productivity: 'bg-v0-gold/10 text-v0-gold',
+      development: 'bg-v0-teal/10 text-v0-teal',
+      creativity: 'bg-v0-red/10 text-v0-red',
+      education: 'bg-v0-gold/10 text-v0-gold',
+      writing: 'bg-v0-teal/10 text-v0-teal',
+      general: 'bg-v0-text-muted/10 text-v0-text-muted',
     };
     return colors[category] || colors.general;
   };
 
   return (
     <Card 
-      className="cursor-pointer hover:shadow-md transition-shadow duration-200 group"
+      className="cursor-pointer hover:shadow-v0-shadow-sm transition-shadow duration-200 group"
       onClick={handleCardClick}
     >
       <CardHeader className="pb-3">
@@ -118,7 +118,7 @@ export const AiBlockCard: React.FC<AiBlockCardProps> = ({
       <CardContent className="pt-0">
         {/* Template Preview */}
         <div className="mb-4">
-          <p className="text-sm text-muted-foreground line-clamp-3 font-mono bg-muted/30 p-2 rounded text-xs">
+          <p className="text-sm text-muted-foreground line-clamp-3 font-mono bg-v0-border-primary/30 p-2 rounded text-xs">
             {aiBlock.prompt_template}
           </p>
         </div>
@@ -134,7 +134,7 @@ export const AiBlockCard: React.FC<AiBlockCardProps> = ({
               {aiBlock.variables.slice(0, 3).map((variable, index) => (
                 <Badge key={index} variant="secondary" className="text-xs">
                   {variable.name}
-                  {variable.required && <span className="text-red-500 ml-1">*</span>}
+                  {variable.required && <span className="text-v0-red ml-1">*</span>}
                 </Badge>
               ))}
               {aiBlock.variables.length > 3 && (

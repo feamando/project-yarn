@@ -3,39 +3,35 @@
 // 
 // Main component for managing AI Blocks (reusable prompts)
 
-import React, { useEffect, useState } from 'react';
+import * as React from 'react';
+import { useEffect, useState } from 'react';
 import { useAiBlocksStore, AiBlock, AiBlockFilter, AiBlockSortBy, SortDirection } from '../../stores/useAiBlocksStore';
+import { V0AIProcessingPanel } from '../v0-components/composition-patterns';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Badge } from '../ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog';
-import { Textarea } from '../ui/textarea';
+// Dialog imports removed - not used
+// Textarea import removed - not used
 import { Label } from '../ui/label';
-import { Separator } from '../ui/separator';
+// Separator import removed - not used
 import { ScrollArea } from '../ui/scroll-area';
 import { 
   Search, 
   Plus, 
   Star, 
-  StarOff, 
-  Edit, 
-  Copy, 
-  Trash2, 
-  Play, 
   Filter,
   SortAsc,
   SortDesc,
   BookOpen,
   Zap,
-  TrendingUp,
+  // TrendingUp removed - not used
   Settings,
-  Download,
-  Upload,
+  // Download, Upload removed - not used
   AlertCircle,
-  CheckCircle
+  // CheckCircle removed - not used
 } from 'lucide-react';
 import { AiBlockCard } from './AiBlockCard';
 import { CreateAiBlockModal } from './CreateAiBlockModal';
@@ -52,7 +48,6 @@ export const AiBlocksManager: React.FC = () => {
     isLoading,
     error,
     searchQuery,
-    currentFilter,
     sortBy,
     sortDirection,
     isCreateModalOpen,
@@ -188,12 +183,12 @@ export const AiBlocksManager: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-background">
+    <div className="flex flex-col h-full bg-v0-dark-bg">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b">
         <div className="flex items-center space-x-2">
           <Zap className="h-6 w-6 text-primary" />
-          <h1 className="text-2xl font-bold">AI Blocks</h1>
+          <h1 className="text-2xl font-serif font-bold">AI Blocks</h1>
           <Badge variant="secondary">{aiBlocks.length}</Badge>
         </div>
         
@@ -216,7 +211,7 @@ export const AiBlocksManager: React.FC = () => {
 
       {/* Error Display */}
       {error && (
-        <div className="mx-4 mt-4 p-3 bg-destructive/10 border border-destructive/20 rounded-md flex items-center">
+        <div className="mx-4 mt-4 p-3 bg-destructive/10 border border-destructive/20 rounded-v0-radius-md flex items-center">
           <AlertCircle className="h-4 w-4 text-destructive mr-2" />
           <span className="text-sm text-destructive">{error}</span>
           <Button
@@ -250,7 +245,7 @@ export const AiBlocksManager: React.FC = () => {
               <CardTitle className="text-sm">Filters & Sorting</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {/* Category Filter */}
                 <div>
                   <Label className="text-xs">Category</Label>
@@ -332,13 +327,20 @@ export const AiBlocksManager: React.FC = () => {
 
           <TabsContent value={activeTab} className="mt-4">
             {isLoading ? (
-              <div className="flex items-center justify-center h-64">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              <div className="h-64">
+                <V0AIProcessingPanel
+                  isProcessing={true}
+                  processedItems={0}
+                  totalItems={1}
+                  title="Loading AI Blocks"
+                  status="active"
+                  className="h-full"
+                />
               </div>
             ) : aiBlocks.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-64 text-center">
                 <Zap className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-medium mb-2">No AI Blocks Found</h3>
+                <h3 className="text-xl font-serif font-medium mb-2">No AI Blocks Found</h3>
                 <p className="text-muted-foreground mb-4">
                   {searchQuery ? 'Try adjusting your search terms.' : 'Create your first AI Block to get started.'}
                 </p>
@@ -351,7 +353,7 @@ export const AiBlocksManager: React.FC = () => {
               </div>
             ) : (
               <ScrollArea className="h-[calc(100vh-300px)]">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-4">
                   {aiBlocks.map((aiBlock) => (
                     <AiBlockCard
                       key={aiBlock.id}
@@ -374,25 +376,31 @@ export const AiBlocksManager: React.FC = () => {
       {/* Usage Stats Sidebar */}
       {usageStats && (
         <div className="border-t p-4">
-          <AiBlockStats stats={usageStats} />
+          <AiBlockStats />
         </div>
       )}
 
       {/* Modals */}
       <CreateAiBlockModal 
         isOpen={isCreateModalOpen}
-        categories={categories}
+        onClose={() => useAiBlocksStore.getState().closeCreateModal()}
       />
       
       <EditAiBlockModal 
         isOpen={isEditModalOpen}
+        onClose={() => useAiBlocksStore.getState().closeEditModal()}
         aiBlock={selectedAiBlock}
-        categories={categories}
       />
       
       <VariableInputModal 
         isOpen={isVariableModalOpen}
+        onClose={() => useAiBlocksStore.getState().closeVariableModal()}
         aiBlock={selectedAiBlock}
+        onUse={(processedPrompt: string) => {
+          // Handle the processed prompt - could integrate with chat or copy to clipboard
+          console.log('Processed prompt:', processedPrompt);
+          useAiBlocksStore.getState().closeVariableModal();
+        }}
       />
     </div>
   );

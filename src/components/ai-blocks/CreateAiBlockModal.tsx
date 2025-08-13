@@ -365,12 +365,12 @@ export const CreateAiBlockModal: React.FC<CreateAiBlockModalProps> = ({
               {formData.variables.length > 0 && (
                 <div className="space-y-2">
                   {formData.variables.map((variable, index) => (
-                    <div key={index} className="flex items-center justify-between p-2 bg-muted rounded">
+                    <div key={index} className="flex items-center justify-between p-2 bg-v0-border-primary rounded">
                       <div className="flex-1">
                         <div className="flex items-center space-x-2">
                           <Badge variant="outline">
                             {variable.name}
-                            {variable.required && <span className="text-red-500 ml-1">*</span>}
+                            {variable.required && <span className="text-v0-red ml-1">*</span>}
                           </Badge>
                           {variable.description && (
                             <span className="text-sm text-muted-foreground">
@@ -398,18 +398,17 @@ export const CreateAiBlockModal: React.FC<CreateAiBlockModalProps> = ({
               )}
             </CardContent>
           </Card>
-        </div>
 
-        {/* Modal Footer */}
-        <div className="flex justify-end space-x-3 pt-6 border-t border-border">
-          <Button variant="outline" onClick={onClose} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button onClick={handleSubmit} disabled={isLoading}>
-            {isLoading ? 'Creating...' : 'Create AI Block'}
-          </Button>
+          {/* Modal Footer */}
+          <div className="flex justify-end space-x-3 pt-6 border-t">
+            <Button variant="outline" onClick={onClose} disabled={isLoading}>
+              Cancel
+            </Button>
+            <Button onClick={handleSubmit} disabled={isLoading}>
+              {isLoading ? 'Creating...' : 'Create AI Block'}
+            </Button>
+          </div>
         </div>
-      </div>
     </DialogEnhanced>
   )
 }

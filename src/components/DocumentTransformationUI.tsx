@@ -22,6 +22,7 @@ import {
   GitBranch,
   Target
 } from 'lucide-react';
+import { ContextIndicator } from '@/components/context-indicator';
 
 // Document state types based on FSM implementation
 type DocumentState = 
@@ -51,19 +52,7 @@ interface Document {
   projectId: string;
 }
 
-// Transformation request/response types
-interface TransformationRequest {
-  documentId: string;
-  targetState: DocumentState;
-  aiAssisted?: boolean;
-}
 
-interface TransformationResponse {
-  success: boolean;
-  message?: string;
-  newState?: DocumentState;
-  transformedContent?: string;
-}
 
 // Available transformation options based on FSM logic
 const TRANSFORMATION_OPTIONS: TransformationOption[] = [
@@ -147,16 +136,16 @@ export const DocumentTransformationUI: React.FC<DocumentTransformationUIProps> =
   }, [document]);
 
   // Get state display info
-  const getStateInfo = (state: DocumentState) => {
+  const getStateInfo = (state: DocumentState | 'review' | 'published') => {
     const stateConfig = {
       draft: { label: 'Draft', color: 'bg-gray-500', description: 'Initial draft state' },
       memo: { label: 'Memo', color: 'bg-blue-500', description: 'Structured memo format' },
-      prfaq: { label: 'PR FAQ', color: 'bg-green-500', description: 'Press Release FAQ' },
+      prfaq: { label: 'PR FAQ', color: 'bg-v0-teal', description: 'Press Release FAQ' },
       prd: { label: 'PRD', color: 'bg-purple-500', description: 'Product Requirements Document' },
       epic_breakdown: { label: 'Epic Breakdown', color: 'bg-orange-500', description: 'Epic with task breakdown' },
       archived: { label: 'Archived', color: 'bg-red-500', description: 'Archived document' }
     };
-    return stateConfig[state] || stateConfig.draft;
+    return stateConfig[state as DocumentState] || stateConfig.draft;
   };
 
   // Handle transformation
@@ -178,7 +167,7 @@ export const DocumentTransformationUI: React.FC<DocumentTransformationUIProps> =
         context: aiAssisted ? `Transform document from ${document.state} to ${transformation.targetState}` : undefined
       });
 
-      if (response.success) {
+      if ((response as any).success) {
         setSuccess(`Document successfully transformed to ${transformation.label}!`);
         
         // Update document state and notify parent
@@ -194,7 +183,7 @@ export const DocumentTransformationUI: React.FC<DocumentTransformationUIProps> =
           onClose?.();
         }, 2000);
       } else {
-        throw new Error(response.message || 'Transformation failed');
+        throw new Error((response as any).message || 'Transformation failed');
       }
     } catch (err) {
       console.error('Transformation error:', err);
@@ -248,7 +237,7 @@ export const DocumentTransformationUI: React.FC<DocumentTransformationUIProps> =
       
       <CardContent className="space-y-4">
         {/* Current Document Info */}
-        <div className="p-3 bg-muted/50 rounded-lg">
+        <div className="p-3 bg-v0-bg-secondary/50 rounded-lg">
           <div className="flex items-center justify-between mb-2">
             <span className="font-medium text-sm">{document.name}</span>
             <Badge className={`text-xs ${currentStateInfo.color} text-white`}>
@@ -260,12 +249,28 @@ export const DocumentTransformationUI: React.FC<DocumentTransformationUIProps> =
 
         {/* Success Alert */}
         {success && (
-          <Alert className="border-green-200 bg-green-50">
-            <CheckCircle className="h-4 w-4 text-green-600" />
-            <AlertDescription className="text-green-800">
+          <Alert className="border-v0-teal/20 bg-v0-teal/10">
+            <CheckCircle className="h-4 w-4 text-v0-teal" />
+            <AlertDescription className="text-v0-teal">
               {success}
             </AlertDescription>
           </Alert>
+        )}
+
+        {/* Document Processing Status */}
+        {isTransforming && (
+          <div className="py-2">
+            <ContextIndicator 
+              isProcessing={isTransforming}
+              processedItems={75}
+              totalItems={100}
+              phase="processing"
+              ariaLabel="Processing document transformation"
+            />
+            <div className="text-xs text-gray-500 mt-1 text-center">
+              Processing document transformation...
+            </div>
+          </div>
         )}
 
         {/* Error Alert */}
@@ -313,7 +318,7 @@ export const DocumentTransformationUI: React.FC<DocumentTransformationUIProps> =
 
             {/* Transformation Preview */}
             {selectedOption && (
-              <div className="p-3 bg-muted/30 rounded-lg">
+              <div className="p-3 bg-v0-bg-secondary/30 rounded-lg">
                 <div className="flex items-center justify-center space-x-3 text-sm">
                   <Badge className={`${currentStateInfo.color} text-white`}>
                     {currentStateInfo.label}
@@ -330,7 +335,7 @@ export const DocumentTransformationUI: React.FC<DocumentTransformationUIProps> =
             )}
 
             {/* AI Assistance Toggle */}
-            <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+            <div className="flex items-center justify-between p-3 bg-v0-bg-secondary/30 rounded-lg">
               <div className="flex items-center space-x-2">
                 <Zap className="h-4 w-4 text-primary" />
                 <span className="text-sm font-medium">AI-Assisted Transformation</span>
