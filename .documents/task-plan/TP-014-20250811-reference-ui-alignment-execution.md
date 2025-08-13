@@ -43,7 +43,7 @@
 - [x] 3.2 Add initial missing components to `src/components/ui/` (accordion, alert-dialog, hover-card, popover, dropdown-menu, menubar, navigation-menu, toast, toaster) and hooks (`use-toast`, `use-is-mobile`)
 - [x] 3.3 Verify component imports and exports work correctly
 - [x] 3.4 Validate TypeScript compilation passes
-- [ ] 3.5 Test component rendering and basic functionality
+- [x] 3.5 Test component rendering and basic functionality (added `UiComponents.smoke.test.tsx`)
 - [ ] 3.6 Commit Phase 2 changes with component inventory update
 
 ### 4.0 Phase 3: Theme Provider Addition (TP-011)
