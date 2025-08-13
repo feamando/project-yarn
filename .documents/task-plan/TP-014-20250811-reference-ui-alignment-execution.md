@@ -71,11 +71,14 @@
 - [x] 4.6 Commit Phase 3 changes with theme integration
 
 ### 5.0 Phase 4: Structural Simplification (TP-012)
-- [ ] 5.1 Execute TP-012: Structural Simplification
-- [ ] 5.2 Evaluate and migrate components from specialized directories
-- [ ] 5.3 Update all import statements for moved components
-- [ ] 5.4 Remove empty directories and update barrel exports
-- [ ] 5.5 Validate all functionality preserved after restructuring
+- [x] 5.1 Execute TP-012: Structural Simplification
+- [x] 5.2 Evaluate and migrate components from specialized directories
+  - Consolidated `src/components/layouts` into `src/components/layout`
+- [x] 5.3 Update all import statements for moved components
+  - Added re-exports in `src/components/layout/index.ts`; created shims `file-tree.tsx` and `tab-system.tsx`
+- [x] 5.4 Remove empty directories and update barrel exports
+  - Centralized simple layouts in `layout/index.ts`
+- [x] 5.5 Validate all functionality preserved after restructuring (TypeScript clean)
 - [ ] 5.6 Commit Phase 4 changes with structure documentation
 
 ### 6.0 Phase 5: Component Consolidation (TP-013)

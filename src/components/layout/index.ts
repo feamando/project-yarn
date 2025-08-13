@@ -56,5 +56,19 @@ export {
   SettingsCard,
 } from './CardComposition';
 
+// === SIMPLE LAYOUTS (migrated from layouts/) ===
+export {
+  ThreePanelLayout,
+  LeftPanel,
+  CenterPanel,
+  RightPanel,
+  PanelHeader,
+  PanelContent,
+  PanelFooter,
+} from './three-panel-layout'
+
+export { FileTree } from './file-tree'
+export { TabSystem, TabBar, TabContent } from './tab-system'
+
 // === LAYOUT COMPOSITION TYPES ===
 // Type exports will be added as needed for external consumption
