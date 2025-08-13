@@ -44,7 +44,23 @@
 - [x] 3.3 Verify component imports and exports work correctly
 - [x] 3.4 Validate TypeScript compilation passes
 - [x] 3.5 Test component rendering and basic functionality (added `UiComponents.smoke.test.tsx`)
-- [ ] 3.6 Commit Phase 2 changes with component inventory update
+- [x] 3.6 Commit Phase 2 changes with component inventory update
+
+#### Phase 2 Component Inventory (snapshot)
+
+- Added to `src/components/ui/`:
+  - accordion, alert-dialog, hover-card, popover, dropdown-menu, menubar,
+    navigation-menu, toast, toaster
+- Existing in project (already present before Phase 2):
+  - alert, badge, button, card, checkbox, dialog, progress, scroll-area,
+    select, tabs, textarea, input, label
+- Project-specific utilities/components (not in reference list):
+  - dialog-enhanced, live-region, skip-links, Animation, Typography
+- Remaining from reference UI to consider adding in future tasks:
+  - aspect-ratio, avatar, breadcrumb, calendar, carousel, chart, collapsible,
+    command, context-menu, drawer, form, input-otp, pagination, radio-group,
+    resizable, separator, sheet, sidebar, skeleton, slider, sonner, switch,
+    table, toggle-group, toggle, tooltip
 
 ### 4.0 Phase 3: Theme Provider Addition (TP-011)
 - [ ] 4.1 Execute TP-011: Theme Provider Addition
