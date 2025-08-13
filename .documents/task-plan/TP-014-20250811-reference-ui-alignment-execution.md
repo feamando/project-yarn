@@ -104,7 +104,14 @@
 - [x] 6.4 Update component documentation and examples
   - Inline usage updated in `CreateAiBlockModal`; follows reference usage
 - [x] 6.5 Validate all consolidated components work correctly (TypeScript clean)
-- [ ] 6.6 Commit Phase 5 changes with consolidation summary
+- [x] 6.6 Commit Phase 5 changes with consolidation summary
+
+#### Phase 5 Consolidation Summary
+
+- Unified modal/dialog usage to `src/components/ui/dialog` for consistency and maintainability.
+- Refactored `CreateAiBlockModal` to use `Dialog`, `DialogContent`, `DialogHeader`, `DialogFooter` per reference UI.
+- Removed reliance on custom focus-trap modal in app code; accessibility is handled by Radix primitives and consistent patterns.
+- No breaking changes detected; type-check clean post-refactor.
 
 ### 7.0 Final Integration and Validation
 - [ ] 7.1 Run complete TypeScript compilation check
