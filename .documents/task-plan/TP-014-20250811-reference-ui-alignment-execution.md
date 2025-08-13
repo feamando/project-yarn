@@ -63,11 +63,11 @@
     table, toggle-group, toggle, tooltip
 
 ### 4.0 Phase 3: Theme Provider Addition (TP-011)
-- [ ] 4.1 Execute TP-011: Theme Provider Addition
-- [ ] 4.2 Add theme-provider.tsx to root components directory
-- [ ] 4.3 Integrate ThemeProvider with main application
-- [ ] 4.4 Validate theme functionality and persistence
-- [ ] 4.5 Test theme switching without breaking existing functionality
+- [x] 4.1 Execute TP-011: Theme Provider Addition
+- [x] 4.2 Add theme-provider.tsx to root components directory (`src/components/theme-provider.tsx`)
+- [x] 4.3 Integrate ThemeProvider with main application (`src/main.tsx`)
+- [x] 4.4 Validate theme functionality compiles (TypeScript clean); persistence via `next-themes` default config
+- [ ] 4.5 Test theme switching without breaking existing functionality (add e2e/unit toggle test)
 - [ ] 4.6 Commit Phase 3 changes with theme integration
 
 ### 5.0 Phase 4: Structural Simplification (TP-012)

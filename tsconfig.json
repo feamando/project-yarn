@@ -17,7 +17,8 @@
     /* Path mapping */
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@tauri-apps/api/*": ["./node_modules/@tauri-apps/api/*"]
     },
 
     /* Linting */
