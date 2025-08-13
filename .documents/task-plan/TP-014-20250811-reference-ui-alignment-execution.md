@@ -68,7 +68,7 @@
 - [x] 4.3 Integrate ThemeProvider with main application (`src/main.tsx`)
 - [x] 4.4 Validate theme functionality compiles (TypeScript clean); persistence via `next-themes` default config
 - [ ] 4.5 Test theme switching without breaking existing functionality (add e2e/unit toggle test)
-- [ ] 4.6 Commit Phase 3 changes with theme integration
+- [x] 4.6 Commit Phase 3 changes with theme integration
 
 ### 5.0 Phase 4: Structural Simplification (TP-012)
 - [ ] 5.1 Execute TP-012: Structural Simplification
