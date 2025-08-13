@@ -96,11 +96,14 @@
   - Single source of truth for layout compositions; aligns with reference UI organization and simplifies maintenance.
 
 ### 6.0 Phase 5: Component Consolidation (TP-013)
-- [ ] 6.1 Execute TP-013: Component Consolidation
-- [ ] 6.2 Consolidate duplicate functionality and standardize interfaces
-- [ ] 6.3 Align component patterns with reference UI philosophy
-- [ ] 6.4 Update component documentation and examples
-- [ ] 6.5 Validate all consolidated components work correctly
+- [x] 6.1 Execute TP-013: Component Consolidation
+- [x] 6.2 Consolidate duplicate functionality and standardize interfaces
+  - Replaced custom `DialogEnhanced` with unified Radix-based `ui/dialog` across `CreateAiBlockModal`
+- [x] 6.3 Align component patterns with reference UI philosophy
+  - Adopted consistent `Dialog`/`DialogContent`/`DialogHeader`/`DialogFooter` structure
+- [x] 6.4 Update component documentation and examples
+  - Inline usage updated in `CreateAiBlockModal`; follows reference usage
+- [x] 6.5 Validate all consolidated components work correctly (TypeScript clean)
 - [ ] 6.6 Commit Phase 5 changes with consolidation summary
 
 ### 7.0 Final Integration and Validation

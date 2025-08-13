@@ -12,7 +12,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Badge } from '../ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
 import { Checkbox } from '../ui/checkbox'
-import { DialogEnhanced } from '../ui/dialog-enhanced'
+import { 
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter
+} from "../ui/dialog"
 import { X, Plus, AlertCircle } from 'lucide-react'
 import { useAiBlocksStore } from '../../stores/useAiBlocksStore'
 import type { AiBlockVariable } from '../../stores/useAiBlocksStore'
@@ -190,15 +197,16 @@ export const CreateAiBlockModal: React.FC<CreateAiBlockModalProps> = ({
   const firstInputRef = useRef<HTMLInputElement>(null)
 
   return (
-    <DialogEnhanced
-      isOpen={isOpen}
-      onClose={onClose}
-      title="Create New AI Block"
-      description="Create a reusable AI prompt template with variables and configuration."
-      size="lg"
-      initialFocusRef={firstInputRef}
-    >
-      <div className="space-y-6">
+    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose() }}>
+      <DialogContent className="max-w-lg w-full">
+        <DialogHeader>
+          <DialogTitle>Create New AI Block</DialogTitle>
+          <DialogDescription>
+            Create a reusable AI prompt template with variables and configuration.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-6">
         {error && (
           <div role="alert" className="bg-destructive/15 border border-destructive/20 rounded-md p-3">
             <div className="flex items-center space-x-2">
@@ -219,6 +227,7 @@ export const CreateAiBlockModal: React.FC<CreateAiBlockModalProps> = ({
                 onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                 placeholder="Enter AI Block name"
                 className={validationErrors.name ? 'border-destructive' : ''}
+                ref={firstInputRef}
               />
               {validationErrors.name && (
                 <p className="text-sm text-destructive mt-1">{validationErrors.name}</p>
@@ -400,15 +409,16 @@ export const CreateAiBlockModal: React.FC<CreateAiBlockModalProps> = ({
           </Card>
 
           {/* Modal Footer */}
-          <div className="flex justify-end space-x-3 pt-6 border-t">
+          <DialogFooter className="pt-6 border-t">
             <Button variant="outline" onClick={onClose} disabled={isLoading}>
               Cancel
             </Button>
             <Button onClick={handleSubmit} disabled={isLoading}>
               {isLoading ? 'Creating...' : 'Create AI Block'}
             </Button>
-          </div>
+          </DialogFooter>
         </div>
-    </DialogEnhanced>
+      </DialogContent>
+    </Dialog>
   )
 }
