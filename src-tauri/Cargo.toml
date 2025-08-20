@@ -30,7 +30,7 @@ reqwest = { version = "0.12", features = ["json", "stream"] }
 # Async utilities for streaming
 futures-util = "0.3"
 # Error handling with derive macros
-thiserror = "1.0"
+thiserror = "2.0"
 # Cryptographic operations for model verification
 sha2 = "0.10"
 hex = "0.4"
