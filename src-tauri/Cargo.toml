@@ -41,7 +41,7 @@ fs_extra = "1.3"
 # Progress reporting
 indicatif = "0.17"
 # Testing dependencies
-tempfile = "3.0"
+tempfile = "3.21"
 # File system watcher for background monitoring
 notify = "6.0"
 
